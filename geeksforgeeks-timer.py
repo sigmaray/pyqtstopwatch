@@ -4,12 +4,14 @@ from PyQt5 import QtCore, QtGui
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import sys
-
+from time_ended_dialog import TimeEndedDialog
 
 class Window(QMainWindow):
 
 	def __init__(self):
 		super().__init__()
+
+		# self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
 
 		# setting title
 		self.setWindowTitle("Python ")
@@ -42,11 +44,20 @@ class Window(QMainWindow):
 		# adding action to the button
 		button.clicked.connect(self.get_seconds)
 
+		# creating push button to get time in seconds
+		buttonS = QPushButton("Set time(s) and start", self)
+
+		# setting geometry to the push button
+		buttonS.setGeometry(125, 160, 150, 50)
+
+		# adding action to the button
+		buttonS.clicked.connect(self.get_seconds_and_start)
+
 		# creating label to show the seconds
 		self.label = QLabel("//TIMER//", self)
 
 		# setting geometry of label
-		self.label.setGeometry(100, 200, 200, 50)
+		self.label.setGeometry(100, 250, 200, 50)
 
 		# setting border to the label
 		self.label.setStyleSheet("border : 3px solid black")
@@ -110,6 +121,8 @@ class Window(QMainWindow):
 				# setting text to the label
 				self.label.setText("Completed !!!! ")
 
+				TimeEndedDialog.run()
+
 		if self.start:
 			# getting text from count
 			text = str(self.count / 10) + " s"
@@ -134,6 +147,25 @@ class Window(QMainWindow):
 
 			# setting text to the label
 			self.label.setText(str(second))
+
+	# method called by the push button
+	def get_seconds_and_start(self):
+
+		# making flag false
+		self.start = False
+
+		# getting seconds and flag
+		second, done = QInputDialog.getInt(self, 'Seconds', 'Enter Seconds:')
+
+		# if flag is true
+		if done:
+			# changing the value of count
+			self.count = second * 10
+
+			# setting text to the label
+			self.label.setText(str(second))
+			
+			self.start_action()
 
 	def start_action(self):
 		# making flag true
