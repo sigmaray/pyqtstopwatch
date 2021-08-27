@@ -6,6 +6,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import QColorConstants
 import datetime
 import sys
+import lib
 
 
 class Window(QMainWindow):
@@ -31,30 +32,6 @@ class Window(QMainWindow):
 
         # showing all the widgets
         self.show()
-
-    def genTextFull(self):
-        tdShort = datetime.timedelta(seconds=round(self.count/10))
-        tdFull = datetime.timedelta(seconds=self.count/10)
-        m = tdFull.microseconds
-        mStr = str(round(tdFull.microseconds / 100000))
-        return str(tdShort) + "." + mStr
-
-    def genTextShort(self):
-        seconds = self.count / 10
-        secondsInt = round(seconds)
-        minInt = round(seconds / 60)
-        hFloat = float(seconds) / 60 / 60
-        hInt = round(seconds / 60 / 60)
-        if seconds <= 99:
-            return str(secondsInt) + "s"
-        elif minInt < 10:
-            return str(round(seconds / 60, 1)) + "m"
-        elif minInt >= 10 and minInt < 60:
-            return str(minInt) + "m"
-        elif minInt >= 60 and hInt < 10:
-            return str(round(hFloat, 1)) + "h"
-        elif hInt >= 10:
-            return str(hInt) + "h"
 
     def drawIconText(self, str="--"):
         pixmap = QPixmap(24, 24)
@@ -171,12 +148,12 @@ class Window(QMainWindow):
 
     def updateTexts(self):
         if self.isRunning:
-            text = self.genTextFull()
+            text = lib.genTextFull(self.count)
             if self.isPaused:
-                text += " paused"
+                text += " p"
             self.label.setText(text)
             if not self.isPaused:
-                self.setIcon(self.genTextShort())
+                self.setIcon(lib.genTextShort(self.count))
             else:
                 self.setIcon("p")
         else:

@@ -24,7 +24,6 @@ def genText(seconds):
     elif hInt >= 10:
         return str(hInt) + "h"
 
-
 class Window(QMainWindow):
     count = 0
     started = False
@@ -208,8 +207,8 @@ class Window(QMainWindow):
             text = str(self.count / 10) + " s"
 
             # showing text
-            self.label.setText(text)
-            self.setIcon(genText(self.count / 10))
+            self.label.setText(lib.genTextFull(self.count))
+            self.setIcon(lib.genTextShort(self.count))
 
     # method called by the push button
 
@@ -255,14 +254,14 @@ class Window(QMainWindow):
         else:
             # making flag true
             self.started = True
-            self.label.setText(genText(self.count / 10))
+            self.label.setText(lib.genTextFull(self.count))
 
         # count = 0
 
     def pause_action(self):
         if self.started:
             # self.setIcon("paused")
-            self.label.setText(str(self.count / 10) + "s" + " " + "paused")
+            self.label.setText(lib.genTextFull(self.count) + " " + "p")
             self.setIcon("p")
             # making flag false
             self.started = False
