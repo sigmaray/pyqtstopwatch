@@ -90,7 +90,7 @@ class Window(QMainWindow):
 		# self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
 
 		# setting title
-		self.setWindowTitle("Python ")
+		self.setWindowTitle("PTimer")
 
 		# setting geometry
 		self.setGeometry(100, 100, 400, 600)
@@ -156,31 +156,33 @@ class Window(QMainWindow):
 		# adding action to the button
 		start_button.clicked.connect(self.start_action)
 
-		# creating pause button
-		exit_button = QPushButton("Pause", self)
 
-		# setting geometry to the button
-		exit_button.setGeometry(125, 400, 150, 40)
-
-		# adding action to the button
-		exit_button.clicked.connect(self.pause_action)
-
-		# creating pause button
-		exit_button = QPushButton("Exit", self)
-
-		# setting geometry to the button
-		exit_button.setGeometry(125, 450, 150, 40)
-
-		exit_button.clicked.connect(qApp.quit)
 
 		# creating reset button
 		reset_button = QPushButton("Reset", self)
 
 		# setting geometry to the button
-		reset_button.setGeometry(125, 500, 150, 40)
+		reset_button.setGeometry(125, 400, 150, 40)
 
 		# adding action to the button
 		reset_button.clicked.connect(self.reset_action)
+
+				# creating pause button
+		pause_button = QPushButton("Pause", self)
+
+		# setting geometry to the button
+		pause_button.setGeometry(125, 450, 150, 40)
+
+		# adding action to the button
+		pause_button.clicked.connect(self.pause_action)
+
+		# creating pause button
+		exit_button = QPushButton("Exit", self)
+
+		# setting geometry to the button
+		exit_button.setGeometry(125, 500, 150, 40)
+
+		exit_button.clicked.connect(qApp.quit)
 
 		self.check_box = QCheckBox('Minimize to Tray on Close', self)
 		self.check_box.setGeometry(125, 550, 250, 40)
@@ -287,11 +289,12 @@ class Window(QMainWindow):
 			
 
 	def pause_action(self):
-		# self.setIcon("paused")
-		self.label.setText(str(self.count / 10) + "s" + " " + "paused")
-		self.setIcon("p")
-		# making flag false
-		self.start = False
+		if self.start:
+			# self.setIcon("paused")
+			self.label.setText(str(self.count / 10) + "s" + " " + "paused")
+			self.setIcon("p")
+			# making flag false
+			self.start = False
 
 	def reset_action(self):
 
