@@ -8,7 +8,7 @@ import lib
 
 
 class Window(QMainWindow):
-    COLOR1 = "#FFFF00"
+    COLOR1 = "#fff"
     COLOR2 = "#6495ED"
 
     count = 0
