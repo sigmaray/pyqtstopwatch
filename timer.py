@@ -5,6 +5,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import sys
 from time_ended_dialog import TimeEndedDialog
+import lib
 
 
 def genText(seconds):
@@ -25,23 +26,11 @@ def genText(seconds):
 
 
 class Window(QMainWindow):
-
-    def drawIcon(self, str="--"):
-        icon = QIcon()
-        pixmap = QPixmap(24, 24)
-        pixmap.fill(QtCore.Qt.white)
-        painter = QPainter(pixmap)
-        # painter.drawText(pixmap.rect(), QtCore.Qt.AlignCenter, "Hi!")
-        # painter.drawText(pixmap.rect(), QtCore.Qt.AlignCenter, "hello")
-        painter.setFont(QFont('Arial', 9))
-        # s = 40
-        # painter.drawText(pixmap.rect(), QtCore.Qt.AlignCenter, genText(s))
-        painter.drawText(pixmap.rect(), QtCore.Qt.AlignCenter, str)
-        painter.end()
-        return QIcon(pixmap)
+    count = 0
+    started = False
 
     def setIcon(self, str="--"):
-        self.tray.setIcon(self.drawIcon(str))
+        self.tray.setIcon(lib.drawIcon(str))
 
     def addTrayIcon(self):
         self.tray = QSystemTrayIcon()
@@ -62,9 +51,6 @@ class Window(QMainWindow):
 
         self.tray.activated.connect(self.onTrayIconActivated)
 
-        # Adding options to the System Tray
-        # self.tray.setContextMenu(menu)
-        # self.tray.setToolTip("Hi!")
         self.tray.setVisible(True)
 
     def onTrayIconActivated(self, reason):
@@ -91,25 +77,16 @@ class Window(QMainWindow):
         # setting geometry
         self.setGeometry(100, 100, 400, 600)
 
-        self.UiComponents()
+        self.uiComponents()
 
         self.moveWindowToCenter()
 
         self.addTrayIcon()
 
-        # showing all the widgets
         self.show()
 
     # method for widgets
-    def UiComponents(self):
-
-        # variables
-        # count variable
-        self.count = 0
-
-        # start flag
-        self.start = False
-
+    def uiComponents(self):
         # creating push button to get time in seconds
         button = QPushButton("Set time(s)", self)
 
@@ -207,7 +184,7 @@ class Window(QMainWindow):
     def showTime(self):
 
         # checking if flag is true
-        if self.start:
+        if self.started:
             # incrementing the counter
             self.count -= 1
 
@@ -215,7 +192,7 @@ class Window(QMainWindow):
             if self.count == 0:
 
                 # making flag false
-                self.start = False
+                self.started = False
 
                 # setting text to the label
                 self.label.setText("Completed !!!! ")
@@ -226,7 +203,7 @@ class Window(QMainWindow):
                 self.setIcon("--")
                 self.label.setText("--")
 
-        if self.start:
+        if self.started:
             # getting text from count
             text = str(self.count / 10) + " s"
 
@@ -239,7 +216,7 @@ class Window(QMainWindow):
     def get_seconds(self):
 
         # making flag false
-        self.start = False
+        self.started = False
 
         # getting seconds and flag
         second, done = QInputDialog.getInt(self, 'Seconds', 'Enter Seconds:')
@@ -256,7 +233,7 @@ class Window(QMainWindow):
     def get_seconds_and_start(self):
 
         # making flag false
-        self.start = False
+        self.started = False
 
         # getting seconds and flag
         second, done = QInputDialog.getInt(self, 'Seconds', 'Enter Seconds:')
@@ -272,27 +249,28 @@ class Window(QMainWindow):
             self.start_action()
 
     def start_action(self):
+        if self.started: return
         if self.count == 0:
-            self.start = False
+            self.started = False
         else:
             # making flag true
-            self.start = True
+            self.started = True
             self.label.setText(genText(self.count / 10))
 
         # count = 0
 
     def pause_action(self):
-        if self.start:
+        if self.started:
             # self.setIcon("paused")
             self.label.setText(str(self.count / 10) + "s" + " " + "paused")
             self.setIcon("p")
             # making flag false
-            self.start = False
+            self.started = False
 
     def reset_action(self):
 
         # making flag false
-        self.start = False
+        self.started = False
 
         # setting count value to 0
         self.count = 0
