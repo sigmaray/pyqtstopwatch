@@ -25,6 +25,10 @@ class Window(QMainWindow):
         # calling method
         self.uiComponents()
 
+        self.moveWindowToCenter()
+
+        self.setFixedSize(self.size())
+
         # showing all the widgets
         self.show()
 
@@ -82,10 +86,23 @@ class Window(QMainWindow):
 
         self.setIcon("--")
 
-        # self.tray.activated.connect(self.onTrayIconActivated)
+        self.tray.activated.connect(self.onTrayIconActivated)
 
         # self.tray.setToolTip("Hi!")
         self.tray.setVisible(True)
+
+    def onTrayIconActivated(self, reason):
+        if reason == QSystemTrayIcon.DoubleClick:
+            self.show()
+            # if self.windowState() == QtCore.Qt.WindowMinimized:
+            self.setWindowState(QtCore.Qt.WindowActive)
+            self.activateWindow()
+
+    def moveWindowToCenter(self):
+        qtRectangle = self.frameGeometry()
+        centerPoint = QDesktopWidget().availableGeometry().center()
+        qtRectangle.moveCenter(centerPoint)
+        self.move(qtRectangle.topLeft())
 
     def uiComponents(self):
         self.addTrayIcon()
@@ -123,7 +140,6 @@ class Window(QMainWindow):
         # setting geometry to the button
         pause.setGeometry(125, 300, 150, 40)
 
-        # add action to the method
         pause.pressed.connect(self.pause)
 
         # creating reset button
@@ -134,6 +150,15 @@ class Window(QMainWindow):
 
         # add action to the method
         re_set.pressed.connect(self.reset)
+
+        # creating pause button
+        minimize = QPushButton("Minimize to tray", self)
+
+        # setting geometry to the button
+        minimize.setGeometry(125, 400, 150, 40)
+
+        # add action to the method
+        minimize.pressed.connect(self.hide)
 
         # creating a timer object
         timer = QTimer(self)
