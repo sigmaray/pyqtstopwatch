@@ -79,7 +79,6 @@ class Window(QMainWindow):
 
 	def onTrayIconActivated(self, reason):
 		if reason == QSystemTrayIcon.DoubleClick:
-			print("QSystemTrayIcon.DoubleClick")
 			self.show()
 			# if self.windowState() == QtCore.Qt.WindowMinimized:
 			self.setWindowState(QtCore.Qt.WindowActive)
@@ -133,7 +132,8 @@ class Window(QMainWindow):
 		buttonS.clicked.connect(self.get_seconds_and_start)
 
 		# creating label to show the seconds
-		self.label = QLabel("//TIMER//", self)
+		# self.label = QLabel("//TIMER//", self)
+		self.label = QLabel("--", self)
 
 		# setting geometry of label
 		self.label.setGeometry(100, 250, 200, 50)
@@ -227,6 +227,7 @@ class Window(QMainWindow):
 				TimeEndedDialog.run()
 
 				self.setIcon("--")
+				self.label.setText("--")
 
 		if self.start:
 			# getting text from count
@@ -264,7 +265,7 @@ class Window(QMainWindow):
 		second, done = QInputDialog.getInt(self, 'Seconds', 'Enter Seconds:')
 
 		# if flag is true
-		if done:
+		if done and second > 0:
 			# changing the value of count
 			self.count = second * 10
 
@@ -274,13 +275,16 @@ class Window(QMainWindow):
 			self.start_action()
 
 	def start_action(self):
-		# making flag true
-		self.start = True
-		self.label.setText(genText(self.count / 10))
-
-		# count = 0
 		if self.count == 0:
 			self.start = False
+		else:
+			# making flag true
+			self.start = True
+			self.label.setText(genText(self.count / 10))
+
+		# count = 0
+		
+			
 
 	def pause_action(self):
 		# self.setIcon("paused")
@@ -298,7 +302,8 @@ class Window(QMainWindow):
 		self.count = 0
 
 		# setting label text
-		self.label.setText("//TIMER//")
+		# self.label.setText("//TIMER//")
+		self.label.setText("--")
 
 		self.label.setText("--")
 
