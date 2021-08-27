@@ -7,19 +7,19 @@ import sys
 from time_ended_dialog import TimeEndedDialog
 
 def genText(seconds):
-    minInt = round(seconds / 60)
-    hFloat  = float(seconds) / 60 / 60
-    hInt = round(seconds / 60 / 60)
-    if seconds <= 99:
-        return str(seconds) + "s"
-    elif minInt < 10 :
-        return str(round(float(seconds) / 60, 1)) + "m"
-    elif minInt >= 10 and minInt < 60:
-        return str(minInt) + "m"
-    elif minInt >= 60 and hInt < 10:
-        return str(round(hFloat, 1)) + "h"
-    elif hInt >= 10:
-        return str(hInt) + "h"
+	minInt = round(seconds / 60)
+	hFloat  = float(seconds) / 60 / 60
+	hInt = round(seconds / 60 / 60)
+	if seconds <= 99:
+		return str(seconds) + "s"
+	elif minInt < 10 :
+		return str(round(float(seconds) / 60, 1)) + "m"
+	elif minInt >= 10 and minInt < 60:
+		return str(minInt) + "m"
+	elif minInt >= 60 and hInt < 10:
+		return str(round(hFloat, 1)) + "h"
+	elif hInt >= 10:
+		return str(hInt) + "h"
 
 class Window(QMainWindow):
 
@@ -54,18 +54,49 @@ class Window(QMainWindow):
 		menu.addAction(option1)
 		menu.addAction(option2)
 
-		# # # To quit the app
-		q = QAction("Quit")
-		# quit.triggered.connect(self.quit)
-		q.triggered.connect(QApplication.quit)		
-		menu.addAction(q)
+		show_action = QAction("Show", self)
+		quit_action = QAction("Exit", self)
+		hide_action = QAction("Hide", self)
+		show_action.triggered.connect(self.show)
+		hide_action.triggered.connect(self.hide)
+		quit_action.triggered.connect(qApp.quit)
+		tray_menu = QMenu()
+		tray_menu.addAction(show_action)
+		tray_menu.addAction(hide_action)
+		tray_menu.addAction(quit_action)
+		self.tray.setContextMenu(tray_menu)
 
 		self.setIcon("--")
 
+		self.tray.activated.connect(self.onTrayIconActivated)
+
 		# Adding options to the System Tray
-		self.tray.setContextMenu(menu)
+		# self.tray.setContextMenu(menu)
 		self.tray.setToolTip("Hi!")
 		self.tray.setVisible(True)
+
+
+	def onTrayIconActivated(self, reason):
+		print("onTrayIconActivated:", reason)
+		if reason == QSystemTrayIcon.Trigger:
+			print("QSystemTrayIcon.Trigger")
+			# self.disambiguateTimer.start(qApp.doubleClickInterval())
+		elif reason == QSystemTrayIcon.DoubleClick:
+			print("QSystemTrayIcon.DoubleClick")
+			self.show()
+			# if self.windowState() == QtCore.Qt.WindowMinimized:
+			self.setWindowState(QtCore.Qt.WindowActive)
+			self.activateWindow()
+
+			# if self.windowState() & QtCore.Qt.WindowMinimized:
+			# 	print("l82")
+			# 	# Window is minimised. Restore it.
+			# 	# self.setWindowState(QtCore.Qt.WindowNoState)
+			# 	self.setWindowState(QtCore.Qt.WindowActive)
+
+
+			# self.disambiguateTimer.stop()
+			# print "Tray icon double clicked" 
 
 	def __init__(self):
 		super().__init__()
@@ -139,22 +170,34 @@ class Window(QMainWindow):
 		start_button.clicked.connect(self.start_action)
 
 		# creating pause button
-		pause_button = QPushButton("Pause", self)
+		exit_button = QPushButton("Pause", self)
 
 		# setting geometry to the button
-		pause_button.setGeometry(125, 400, 150, 40)
+		exit_button.setGeometry(125, 400, 150, 40)
 
 		# adding action to the button
-		pause_button.clicked.connect(self.pause_action)
+		exit_button.clicked.connect(self.pause_action)
+
+		# creating pause button
+		exit_button = QPushButton("Exit", self)
+
+		# setting geometry to the button
+		exit_button.setGeometry(125, 450, 150, 40)
+
+		exit_button.clicked.connect(qApp.quit)
 
 		# creating reset button
 		reset_button = QPushButton("Reset", self)
 
 		# setting geometry to the button
-		reset_button.setGeometry(125, 450, 150, 40)
+		reset_button.setGeometry(125, 500, 150, 40)
 
 		# adding action to the button
 		reset_button.clicked.connect(self.reset_action)
+
+		self.check_box = QCheckBox('Minimize to Tray on Close', self)
+		self.check_box.setGeometry(125, 550, 250, 40)
+		self.check_box.setChecked(True)
 
 		# creating a timer object
 		timer = QTimer(self)
@@ -164,6 +207,17 @@ class Window(QMainWindow):
 
 		# update the timer every tenth second
 		timer.start(100)
+
+	def closeEvent(self, event):
+		if self.check_box.isChecked():
+			event.ignore()
+			self.hide()
+			# self.tray_icon.showMessage(
+			# 	"Tray Program",
+			# 	"Application was minimized to Tray",
+			# 	QSystemTrayIcon.Information,
+			# 	2000
+			# )
 
 	# method called by timer
 	def showTime(self):
