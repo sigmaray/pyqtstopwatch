@@ -24,9 +24,11 @@ def genText(seconds):
     elif hInt >= 10:
         return str(hInt) + "h"
 
+
 class Window(QMainWindow):
     count = 0
-    started = False
+    isRunning = False
+    isPaused = False
 
     def setIcon(self, str="--"):
         self.tray.setIcon(lib.drawIcon(str))
@@ -163,7 +165,7 @@ class Window(QMainWindow):
         timer = QTimer(self)
 
         # adding action to timer
-        timer.timeout.connect(self.showTime)
+        timer.timeout.connect(self.timeLoop)
 
         # update the timer every tenth second
         timer.start(100)
@@ -179,11 +181,8 @@ class Window(QMainWindow):
             #     2000
             # )
 
-    # method called by timer
-    def showTime(self):
-
-        # checking if flag is true
-        if self.started:
+    def timeLoop(self):
+        if self.isRunning and not self.isPaused:
             # incrementing the counter
             self.count -= 1
 
@@ -191,31 +190,41 @@ class Window(QMainWindow):
             if self.count == 0:
 
                 # making flag false
-                self.started = False
+                self.isRunning = False
 
                 # setting text to the label
-                self.label.setText("Completed !!!! ")
-                self.setIcon("!")
+                self.updateTexts(True)
 
                 TimeEndedDialog.run()
 
-                self.setIcon("--")
-                self.label.setText("--")
+                self.updateTexts()
 
-        if self.started:
-            # getting text from count
-            text = str(self.count / 10) + " s"
+        if self.isRunning:
+            self.updateTexts()
 
-            # showing text
-            self.label.setText(lib.genTextFull(self.count))
-            self.setIcon(lib.genTextShort(self.count))
+    def updateTexts(self, completed=False):
+        if completed:
+            self.label.setText("Completed !!!! ")
+            self.setIcon("!")
+        elif self.isRunning:
+            text = lib.genTextFull(self.count)
+            if self.isPaused:
+                text += " p"
+            self.label.setText(text)
+            if not self.isPaused:
+                self.setIcon(lib.genTextShort(self.count))
+            else:
+                self.setIcon("p")
+        else:
+            self.setIcon("--")
+            self.label.setText("--")
 
     # method called by the push button
 
     def get_seconds(self):
 
         # making flag false
-        self.started = False
+        self.isRunning = False
 
         # getting seconds and flag
         second, done = QInputDialog.getInt(self, 'Seconds', 'Enter Seconds:')
@@ -225,14 +234,13 @@ class Window(QMainWindow):
             # changing the value of count
             self.count = second * 10
 
-            # setting text to the label
-            self.label.setText(str(second))
+            self.updateTexts()
 
     # method called by the push button
     def get_seconds_and_start(self):
 
         # making flag false
-        self.started = False
+        self.isRunning = False
 
         # getting seconds and flag
         second, done = QInputDialog.getInt(self, 'Seconds', 'Enter Seconds:')
@@ -242,43 +250,35 @@ class Window(QMainWindow):
             # changing the value of count
             self.count = second * 10
 
-            # setting text to the label
-            self.label.setText(str(second))
+            self.updateTexts()
 
             self.start_action()
 
     def start_action(self):
-        if self.started: return
         if self.count == 0:
-            self.started = False
+            self.isRunning = False
         else:
-            # making flag true
-            self.started = True
-            self.label.setText(lib.genTextFull(self.count))
+            self.isRunning = True
+            self.isPaused = False
+            self.updateTexts()
 
         # count = 0
 
     def pause_action(self):
-        if self.started:
-            # self.setIcon("paused")
-            self.label.setText(lib.genTextFull(self.count) + " " + "p")
-            self.setIcon("p")
-            # making flag false
-            self.started = False
+        if self.isRunning:
+            self.isPaused = True
+            self.updateTexts()
 
     def reset_action(self):
 
         # making flag false
-        self.started = False
+        self.isRunning = False
+        self.isPaused = False
 
         # setting count value to 0
         self.count = 0
 
-        # setting label text
-        # self.label.setText("//TIMER//")
-        self.label.setText("--")
-
-        self.label.setText("--")
+        self.updateTexts()
 
 
 # create pyqt5 app
