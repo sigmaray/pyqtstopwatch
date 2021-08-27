@@ -4,7 +4,7 @@ from PyQt5 import QtCore, QtGui
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
-from time_ended_dialog import TimeEndedDialog
+from timerEndedDialog import TimeEndedDialog
 import lib
 
 
@@ -19,18 +19,18 @@ class Window(QMainWindow):
     def addTrayIcon(self):
         self.tray = QSystemTrayIcon()
 
-        show_action = QAction("Show", self)
-        quit_action = QAction("Exit", self)
-        hide_action = QAction("Hide", self)
-        show_action.triggered.connect(self.show)
-        hide_action.triggered.connect(self.hide)
-        quit_action.triggered.connect(qApp.quit)
+        actionShow = QAction("Show", self)
+        actionQuit = QAction("Exit", self)
+        actionHide = QAction("Hide", self)
+        actionShow.triggered.connect(self.show)
+        actionHide.triggered.connect(self.hide)
+        actionQuit.triggered.connect(qApp.quit)
 
-        tray_menu = QMenu()
-        tray_menu.addAction(show_action)
-        tray_menu.addAction(hide_action)
-        tray_menu.addAction(quit_action)
-        self.tray.setContextMenu(tray_menu)
+        menu = QMenu()
+        menu.addAction(actionShow)
+        menu.addAction(actionHide)
+        menu.addAction(actionQuit)
+        self.tray.setContextMenu(menu)
 
         self.setTrayText("--")
 
@@ -58,7 +58,7 @@ class Window(QMainWindow):
 
         self.setWindowTitle("PythonTimer")
 
-        self.setGeometry(100, 100, 400, 600)
+        self.setGeometry(100, 100, 400, 520)
 
         self.moveWindowToCenter()
 
@@ -76,33 +76,34 @@ class Window(QMainWindow):
         timer.start(100)
 
     def addUiComponents(self):
-        buttonSet = QPushButton("Set time(s)", self)
-        buttonSet.setGeometry(125, 50, 150, 50)
-        buttonSet.clicked.connect(self.onClickSet)
+        # buttonSet = QPushButton("Set time(s)", self)
+        # buttonSet.setGeometry(125, 50, 150, 50)
+        # buttonSet.clicked.connect(self.onClickSet)
 
-        buttonSetStart = QPushButton("Set time(s) and start", self)
-        buttonSetStart.setGeometry(125, 120, 150, 50)
+        buttonSetStart = QPushButton("Set time and start", self)
+        buttonSetStart.setGeometry(125, 50, 150, 50)
         buttonSetStart.clicked.connect(self.onClickSetStart)
 
         self.labelCountdown = QLabel("--", self)
-        self.labelCountdown.setGeometry(100, 200, 200, 50)
+        self.labelCountdown.setGeometry(100, 120, 200, 50)
         self.labelCountdown.setStyleSheet("border : 3px solid black")
         self.labelCountdown.setFont(QFont('Times', 15))
         self.labelCountdown.setAlignment(Qt.AlignCenter)
 
         buttonStart = QPushButton("Start", self)
-        buttonStart.setGeometry(125, 300, 150, 40)
+        buttonStart.setGeometry(125, 190, 150, 50)
         buttonStart.clicked.connect(self.onClickStart)
+
         reset_button = QPushButton("Reset", self)
-        reset_button.setGeometry(125, 350, 150, 40)
+        reset_button.setGeometry(125, 260, 150, 50)
         reset_button.clicked.connect(self.onClickReset)
 
         buttonPause = QPushButton("Pause", self)
-        buttonPause.setGeometry(125, 400, 150, 40)
+        buttonPause.setGeometry(125, 330, 150, 50)
         buttonPause.clicked.connect(self.onClickPause)
 
         buttonMinimize = QPushButton("Minimize to tray", self)
-        buttonMinimize.setGeometry(125, 450, 150, 40)
+        buttonMinimize.setGeometry(125, 400, 150, 50)
         buttonMinimize.pressed.connect(self.hide)
 
         # buttonExit = QPushButton("Exit", self)

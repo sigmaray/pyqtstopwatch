@@ -36,9 +36,7 @@ def genTextShort(count):
     hInt = round(seconds / 60 / 60)
     if seconds <= 99:
         return str(secondsInt) + "s"
-    elif minInt < 10:
-        return str(round(seconds / 60, 1)) + "m"
-    elif minInt >= 10 and minInt < 60:
+    elif minInt < 60:
         return str(minInt) + "m"
     elif minInt >= 60 and hInt < 10:
         return str(round(hFloat, 1)) + "h"
