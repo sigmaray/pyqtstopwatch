@@ -5,10 +5,17 @@ from PyQt5.QtCore import *
 import sys
 import datetime
 
-def drawIcon(str="--"):
+def drawIcon(str="--", textColor = "#000", bgColor = "#fff"):
     pixmap = QPixmap(24, 24)
-    pixmap.fill(QtCore.Qt.white)
+    pixmap.fill(QColor(bgColor))
+
+    # pixmap.fill(QColorConstants.Svg.cornflowerblue)
+    # painter = QPainter(pixmap)
+    # painter.setFont(QFont('Arial', 9))
+    # painter.setPen(QColor("#FFFF00"))
+
     painter = QPainter(pixmap)
+    painter.setPen(QColor(textColor))
     painter.setFont(QFont('Arial', 9))
     painter.drawText(pixmap.rect(), QtCore.Qt.AlignCenter, str)
     painter.end()

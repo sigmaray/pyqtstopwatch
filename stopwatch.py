@@ -33,18 +33,8 @@ class Window(QMainWindow):
         # showing all the widgets
         self.show()
 
-    def drawIconText(self, str="--"):
-        pixmap = QPixmap(24, 24)
-        pixmap.fill(QColorConstants.Svg.cornflowerblue)
-        painter = QPainter(pixmap)
-        painter.setFont(QFont('Arial', 9))
-        painter.setPen(QColor("#FFFF00"))
-        painter.drawText(pixmap.rect(), QtCore.Qt.AlignCenter, str)
-        painter.end()
-        return QIcon(pixmap)
-
     def setIcon(self, str="--"):
-        self.tray.setIcon(self.drawIconText(str))
+        self.tray.setIcon(lib.drawIcon(str, "#FFFF00", "#6495ED"))
 
     def addTrayIcon(self):
         self.tray = QSystemTrayIcon()
@@ -65,7 +55,6 @@ class Window(QMainWindow):
 
         self.tray.activated.connect(self.onTrayIconActivated)
 
-        # self.tray.setToolTip("Hi!")
         self.tray.setVisible(True)
 
     def onTrayIconActivated(self, reason):
@@ -83,17 +72,10 @@ class Window(QMainWindow):
 
     def uiComponents(self):
         self.addTrayIcon()
-        # creating a label to show the time
+
         self.label = QLabel(self)
-
-        # setting geometry of label
         self.label.setGeometry(75, 100, 250, 70)
-
-        # adding border to the label
         self.label.setStyleSheet("border : 4px solid black;")
-
-        # setting text to the label
-        # self.label.setText(str(self.count))
         self.label.setText("--")
 
         # setting font to the label
@@ -102,48 +84,26 @@ class Window(QMainWindow):
         # setting alignment to the text of label
         self.label.setAlignment(Qt.AlignCenter)
 
-        # creating start button
-        start = QPushButton("Start", self)
+        start_button = QPushButton("Start", self)
+        start_button.setGeometry(125, 250, 150, 40)
+        start_button.pressed.connect(self.start)
 
-        # setting geometry to the button
-        start.setGeometry(125, 250, 150, 40)
+        pause_button = QPushButton("Pause", self)
+        pause_button.setGeometry(125, 300, 150, 40)
+        pause_button.pressed.connect(self.pause)
 
-        # add action to the method
-        start.pressed.connect(self.start)
 
-        # creating pause button
-        pause = QPushButton("Pause", self)
+        reset_button = QPushButton("Re-set", self)
+        reset_button.setGeometry(125, 350, 150, 40)
+        reset_button.pressed.connect(self.reset)
 
-        # setting geometry to the button
-        pause.setGeometry(125, 300, 150, 40)
-
-        pause.pressed.connect(self.pause)
-
-        # creating reset button
-        re_set = QPushButton("Re-set", self)
-
-        # setting geometry to the button
-        re_set.setGeometry(125, 350, 150, 40)
-
-        # add action to the method
-        re_set.pressed.connect(self.reset)
-
-        # creating pause button
-        minimize = QPushButton("Minimize to tray", self)
-
-        # setting geometry to the button
-        minimize.setGeometry(125, 400, 150, 40)
-
-        # add action to the method
-        minimize.pressed.connect(self.hide)
+        minimize_button = QPushButton("Minimize to tray", self)
+        minimize_button.setGeometry(125, 400, 150, 40)
+        minimize_button.pressed.connect(self.hide)
 
         # creating a timer object
         timer = QTimer(self)
-
-        # adding action to timer
         timer.timeout.connect(self.timeLoop)
-
-        # update the timer every tenth second
         timer.start(100)
 
     def updateTexts(self):
