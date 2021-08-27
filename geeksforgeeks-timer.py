@@ -6,14 +6,16 @@ from PyQt5.QtCore import *
 import sys
 from time_ended_dialog import TimeEndedDialog
 
+
 def genText(seconds):
+	secondsInt = round(seconds)
 	minInt = round(seconds / 60)
-	hFloat  = float(seconds) / 60 / 60
+	hFloat = float(seconds) / 60 / 60
 	hInt = round(seconds / 60 / 60)
 	if seconds <= 99:
-		return str(seconds) + "s"
-	elif minInt < 10 :
-		return str(round(float(seconds) / 60, 1)) + "m"
+		return str(secondsInt) + "s"
+	elif minInt < 10:
+		return str(round(seconds / 60, 1)) + "m"
 	elif minInt >= 10 and minInt < 60:
 		return str(minInt) + "m"
 	elif minInt >= 60 and hInt < 10:
@@ -21,10 +23,10 @@ def genText(seconds):
 	elif hInt >= 10:
 		return str(hInt) + "h"
 
+
 class Window(QMainWindow):
 
-
-	def drawIcon(self, str = "--"):
+	def drawIcon(self, str="--"):
 		icon = QIcon()
 		pixmap = QPixmap(24, 24)
 		pixmap.fill(QtCore.Qt.white)
@@ -36,15 +38,15 @@ class Window(QMainWindow):
 		# painter.drawText(pixmap.rect(), QtCore.Qt.AlignCenter, genText(s))
 		painter.drawText(pixmap.rect(), QtCore.Qt.AlignCenter, str)
 		painter.end()
-		return QIcon(pixmap);
+		return QIcon(pixmap)
 
-	def setIcon(self, str = "--"):
+	def setIcon(self, str="--"):
 		self.tray.setIcon(self.drawIcon(str))
 
 	def addTrayIcon(self):
 		# Adding an icon
 		# icon = QIcon("icon.png")
-	
+
 		self.tray = QSystemTrayIcon()
 
 		# Creating the options
@@ -75,28 +77,13 @@ class Window(QMainWindow):
 		self.tray.setToolTip("Hi!")
 		self.tray.setVisible(True)
 
-
 	def onTrayIconActivated(self, reason):
-		print("onTrayIconActivated:", reason)
-		if reason == QSystemTrayIcon.Trigger:
-			print("QSystemTrayIcon.Trigger")
-			# self.disambiguateTimer.start(qApp.doubleClickInterval())
-		elif reason == QSystemTrayIcon.DoubleClick:
+		if reason == QSystemTrayIcon.DoubleClick:
 			print("QSystemTrayIcon.DoubleClick")
 			self.show()
 			# if self.windowState() == QtCore.Qt.WindowMinimized:
 			self.setWindowState(QtCore.Qt.WindowActive)
 			self.activateWindow()
-
-			# if self.windowState() & QtCore.Qt.WindowMinimized:
-			# 	print("l82")
-			# 	# Window is minimised. Restore it.
-			# 	# self.setWindowState(QtCore.Qt.WindowNoState)
-			# 	self.setWindowState(QtCore.Qt.WindowActive)
-
-
-			# self.disambiguateTimer.stop()
-			# print "Tray icon double clicked" 
 
 	def __init__(self):
 		super().__init__()
@@ -249,8 +236,8 @@ class Window(QMainWindow):
 			self.label.setText(text)
 			self.setIcon(genText(self.count / 10))
 
-
 	# method called by the push button
+
 	def get_seconds(self):
 
 		# making flag false
@@ -283,19 +270,22 @@ class Window(QMainWindow):
 
 			# setting text to the label
 			self.label.setText(str(second))
-			
+
 			self.start_action()
 
 	def start_action(self):
 		# making flag true
 		self.start = True
+		self.label.setText(genText(self.count / 10))
 
 		# count = 0
 		if self.count == 0:
 			self.start = False
 
 	def pause_action(self):
-
+		# self.setIcon("paused")
+		self.label.setText(str(self.count / 10) + "s" + " " + "paused")
+		self.setIcon("p")
 		# making flag false
 		self.start = False
 
@@ -310,6 +300,7 @@ class Window(QMainWindow):
 		# setting label text
 		self.label.setText("//TIMER//")
 
+		self.label.setText("--")
 
 
 # create pyqt5 app
