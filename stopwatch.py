@@ -8,6 +8,9 @@ import lib
 
 
 class Window(QMainWindow):
+    COLOR1 = "#FFFF00"
+    COLOR2 = "#6495ED"
+
     count = 0
     isRunning = False
     isPaused = False
@@ -30,7 +33,7 @@ class Window(QMainWindow):
         self.show()
 
     def setTrayText(self, str="--"):
-        self.tray.setIcon(lib.drawIcon(str, "#FFFF00", "#6495ED"))
+        self.tray.setIcon(lib.drawIcon(str, self.COLOR1, self.COLOR2))
 
     def addTrayIcon(self):
         self.tray = QSystemTrayIcon()
@@ -71,7 +74,7 @@ class Window(QMainWindow):
 
         self.label = QLabel(self)
         self.label.setGeometry(75, 100, 250, 70)
-        self.label.setStyleSheet("border : 4px solid black;")
+        self.label.setStyleSheet("border : 4px solid " + self.COLOR2 + "; color: " + self.COLOR2 + ";")
         self.label.setText("--")
         self.label.setFont(QFont('Arial', 25))
         self.label.setAlignment(Qt.AlignCenter)

@@ -9,12 +9,15 @@ import lib
 
 
 class Window(QMainWindow):
+    COLOR1 = "#fff"
+    COLOR2 = "#000080"
+
     count = 0
     isRunning = False
     isPaused = False
 
     def setTrayText(self, str="--"):
-        self.tray.setIcon(lib.drawIcon(str, "#fff", "#000080"))
+        self.tray.setIcon(lib.drawIcon(str, self.COLOR1, self.COLOR2))
 
     def addTrayIcon(self):
         self.tray = QSystemTrayIcon()
@@ -85,25 +88,25 @@ class Window(QMainWindow):
         buttonSetStart.clicked.connect(self.onClickSetStart)
 
         self.labelCountdown = QLabel("--", self)
-        self.labelCountdown.setGeometry(100, 120, 200, 50)
-        self.labelCountdown.setStyleSheet("border : 3px solid black")
+        self.labelCountdown.setGeometry(100, 140, 200, 50)
+        self.labelCountdown.setStyleSheet("border : 4px solid " + self.COLOR2 + "; color: " + self.COLOR2 + ";")
         self.labelCountdown.setFont(QFont('Times', 15))
         self.labelCountdown.setAlignment(Qt.AlignCenter)
 
         buttonStart = QPushButton("Start", self)
-        buttonStart.setGeometry(125, 190, 150, 50)
+        buttonStart.setGeometry(125, 230, 150, 50)
         buttonStart.clicked.connect(self.onClickStart)
 
         reset_button = QPushButton("Reset", self)
-        reset_button.setGeometry(125, 260, 150, 50)
+        reset_button.setGeometry(125, 300, 150, 50)
         reset_button.clicked.connect(self.onClickReset)
 
         buttonPause = QPushButton("Pause", self)
-        buttonPause.setGeometry(125, 330, 150, 50)
+        buttonPause.setGeometry(125, 370, 150, 50)
         buttonPause.clicked.connect(self.onClickPause)
 
         buttonMinimize = QPushButton("Minimize to tray", self)
-        buttonMinimize.setGeometry(125, 400, 150, 50)
+        buttonMinimize.setGeometry(125, 440, 150, 50)
         buttonMinimize.pressed.connect(self.hide)
 
         # buttonExit = QPushButton("Exit", self)
