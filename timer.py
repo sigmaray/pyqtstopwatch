@@ -13,7 +13,7 @@ class Window(QMainWindow):
     isRunning = False
     isPaused = False
 
-    def setIconText(self, str="--"):
+    def setTrayText(self, str="--"):
         self.tray.setIcon(lib.drawIcon(str, "#fff", "#000080"))
 
     def addTrayIcon(self):
@@ -32,7 +32,7 @@ class Window(QMainWindow):
         tray_menu.addAction(quit_action)
         self.tray.setContextMenu(tray_menu)
 
-        self.setIconText("--")
+        self.setTrayText("--")
 
         self.tray.activated.connect(self.onTrayIconActivated)
 
@@ -56,7 +56,7 @@ class Window(QMainWindow):
 
         # self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
 
-        self.setWindowTitle("PTimer")
+        self.setWindowTitle("PythonTimer")
 
         self.setGeometry(100, 100, 400, 600)
 
@@ -72,7 +72,7 @@ class Window(QMainWindow):
 
     def addTimer(self):
         timer = QTimer(self)
-        timer.timeout.connect(self.timeLoop)
+        timer.timeout.connect(self.onTimer)
         timer.start(100)
 
     def addUiComponents(self):
@@ -105,17 +105,11 @@ class Window(QMainWindow):
         buttonMinimize.setGeometry(125, 450, 150, 40)
         buttonMinimize.pressed.connect(self.hide)
 
-        buttonExit = QPushButton("Exit", self)
-        buttonExit.setGeometry(125, 500, 150, 40)
-        buttonExit.clicked.connect(qApp.quit)
+        # buttonExit = QPushButton("Exit", self)
+        # buttonExit.setGeometry(125, 500, 150, 40)
+        # buttonExit.clicked.connect(qApp.quit)
 
-
-    # def closeEvent(self, event):
-    #     if self.check_box.isChecked():
-    #         event.ignore()
-    #         self.hide()
-
-    def timeLoop(self):
+    def onTimer(self):
         if self.isRunning and not self.isPaused:
             self.count -= 1
 
@@ -131,18 +125,18 @@ class Window(QMainWindow):
     def updateTexts(self, completed=False):
         if completed:
             self.labelCountdown.setText("Completed !!!! ")
-            self.setIconText("!")
+            self.setTrayText("!")
         elif self.isRunning:
             text = lib.genTextFull(self.count)
             if self.isPaused:
                 text += " p"
             self.labelCountdown.setText(text)
             if not self.isPaused:
-                self.setIconText(lib.genTextShort(self.count))
+                self.setTrayText(lib.genTextShort(self.count))
             else:
-                self.setIconText("p")
+                self.setTrayText("p")
         else:
-            self.setIconText("--")
+            self.setTrayText("--")
             self.labelCountdown.setText("--")
 
     def onClickSet(self):
@@ -179,6 +173,11 @@ class Window(QMainWindow):
         self.count = 0
 
         self.updateTexts()
+
+    # def closeEvent(self, event):
+    #     if self.check_box.isChecked():
+    #         event.ignore()
+    #         self.hide()
 
 
 App = QApplication(sys.argv)
