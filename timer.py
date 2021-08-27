@@ -44,17 +44,7 @@ class Window(QMainWindow):
         self.tray.setIcon(self.drawIcon(str))
 
     def addTrayIcon(self):
-        # Adding an icon
-        # icon = QIcon("icon.png")
-
         self.tray = QSystemTrayIcon()
-
-        # Creating the options
-        menu = QMenu()
-        option1 = QAction("Geeks for Geeks")
-        option2 = QAction("GFG")
-        menu.addAction(option1)
-        menu.addAction(option2)
 
         show_action = QAction("Show", self)
         quit_action = QAction("Exit", self)
@@ -84,6 +74,12 @@ class Window(QMainWindow):
             self.setWindowState(QtCore.Qt.WindowActive)
             self.activateWindow()
 
+    def moveWindowToCenter(self):
+        qtRectangle = self.frameGeometry()
+        centerPoint = QDesktopWidget().availableGeometry().center()
+        qtRectangle.moveCenter(centerPoint)
+        self.move(qtRectangle.topLeft())
+
     def __init__(self):
         super().__init__()
 
@@ -95,8 +91,9 @@ class Window(QMainWindow):
         # setting geometry
         self.setGeometry(100, 100, 400, 600)
 
-        # calling method
         self.UiComponents()
+
+        self.moveWindowToCenter()
 
         self.addTrayIcon()
 
@@ -156,8 +153,6 @@ class Window(QMainWindow):
         # adding action to the button
         start_button.clicked.connect(self.start_action)
 
-
-
         # creating reset button
         reset_button = QPushButton("Reset", self)
 
@@ -167,7 +162,7 @@ class Window(QMainWindow):
         # adding action to the button
         reset_button.clicked.connect(self.reset_action)
 
-                # creating pause button
+        # creating pause button
         pause_button = QPushButton("Pause", self)
 
         # setting geometry to the button
@@ -285,8 +280,6 @@ class Window(QMainWindow):
             self.label.setText(genText(self.count / 10))
 
         # count = 0
-        
-            
 
     def pause_action(self):
         if self.start:
