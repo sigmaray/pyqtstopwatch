@@ -1,22 +1,28 @@
 import sys
 from munch import Munch, munchify, unmunchify
 
-from PyQt5.QtWidgets import (
-    QApplication,
-    QFormLayout,
-    QLabel,
-    QLineEdit,
-    QWidget,
-    QDialogButtonBox,
-    QVBoxLayout,
-    QDialog,
-    QCheckBox,
-    QMessageBox
-)
+# from PyQt5.QtWidgets import (
+#     QApplication,
+#     QFormLayout,
+#     QLabel,
+#     QLineEdit,
+#     QWidget,
+#     QDialogButtonBox,
+#     QVBoxLayout,
+#     QDialog,
+#     QCheckBox,
+#     QMessageBox,
+#     QIcon
+# )
+
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 
 from PyQt5 import QtCore
 
 import random
+
+
 
 class TimeEndedDialog(QDialog):
     settings = None
@@ -45,6 +51,7 @@ class TimeEndedDialog(QDialog):
 
         # self.setModal(True)        
         self.setWindowTitle("Time Ended")
+
         # self.resize(270, 110)
         # Create a QFormLayout instance
         dlgLayout = QVBoxLayout()

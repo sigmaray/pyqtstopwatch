@@ -23,22 +23,28 @@ def genText(seconds):
 
 class Window(QMainWindow):
 
-	def addTrayIcon(self):
-		# Adding an icon
-		# icon = QIcon("icon.png")
+
+	def drawIcon(self, str = "--"):
 		icon = QIcon()
-
-
 		pixmap = QPixmap(24, 24)
 		pixmap.fill(QtCore.Qt.white)
 		painter = QPainter(pixmap)
 		# painter.drawText(pixmap.rect(), QtCore.Qt.AlignCenter, "Hi!")
 		# painter.drawText(pixmap.rect(), QtCore.Qt.AlignCenter, "hello")
-		s = 40
 		painter.setFont(QFont('Arial', 9))
-		painter.drawText(pixmap.rect(), QtCore.Qt.AlignCenter, genText(s))
+		# s = 40
+		# painter.drawText(pixmap.rect(), QtCore.Qt.AlignCenter, genText(s))
+		painter.drawText(pixmap.rect(), QtCore.Qt.AlignCenter, str)
 		painter.end()
-		icon = QIcon(pixmap);
+		return QIcon(pixmap);
+
+	def setIcon(self, str = "--"):
+		self.tray.setIcon(self.drawIcon(str))
+
+	def addTrayIcon(self):
+		# Adding an icon
+		# icon = QIcon("icon.png")
+	
 		self.tray = QSystemTrayIcon()
 
 		# Creating the options
@@ -54,20 +60,12 @@ class Window(QMainWindow):
 		q.triggered.connect(QApplication.quit)		
 		menu.addAction(q)
 
+		self.setIcon("--")
+
 		# Adding options to the System Tray
 		self.tray.setContextMenu(menu)
-
-		self.tray.setIcon(icon)
 		self.tray.setToolTip("Hi!")
 		self.tray.setVisible(True)
-
-		# Adding item on the menu bar
-		# tray = QSystemTrayIcon()
-		# tray.setIcon(icon)
-		# tray.setVisible(True)
-
-
-
 
 	def __init__(self):
 		super().__init__()
@@ -83,7 +81,7 @@ class Window(QMainWindow):
 		# calling method
 		self.UiComponents()
 
-		# self.addTrayIcon()
+		self.addTrayIcon()
 
 		# showing all the widgets
 		self.show()
@@ -183,8 +181,11 @@ class Window(QMainWindow):
 
 				# setting text to the label
 				self.label.setText("Completed !!!! ")
+				self.setIcon("!")
 
 				TimeEndedDialog.run()
+
+				self.setIcon("--")
 
 		if self.start:
 			# getting text from count
@@ -192,6 +193,7 @@ class Window(QMainWindow):
 
 			# showing text
 			self.label.setText(text)
+			self.setIcon(genText(self.count / 10))
 
 
 	# method called by the push button
