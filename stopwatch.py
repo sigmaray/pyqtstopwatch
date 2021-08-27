@@ -9,12 +9,9 @@ import sys
 
 
 class Window(QMainWindow):
-    # counter
     count = 0
-
-    # creating flag
-    running = False
-    paused = False
+    isRunning = False
+    isPaused = False
 
     def __init__(self):
         super().__init__()
@@ -26,19 +23,20 @@ class Window(QMainWindow):
         self.setGeometry(100, 100, 400, 500)
 
         # calling method
-        self.UiComponents()
+        self.uiComponents()
 
         # showing all the widgets
         self.show()
 
-    def count_to_str(self):
+    def genTextFull(self):
         tdShort = datetime.timedelta(seconds=round(self.count/10))
         tdFull = datetime.timedelta(seconds=self.count/10)
         m = tdFull.microseconds
         mStr = str(round(tdFull.microseconds / 100000))
         return str(tdShort) + "." + mStr
 
-    def genText(self, seconds):
+    def genTextShort(self):
+        seconds = self.count / 10
         secondsInt = round(seconds)
         minInt = round(seconds / 60)
         hFloat = float(seconds) / 60 / 60
@@ -54,31 +52,20 @@ class Window(QMainWindow):
         elif hInt >= 10:
             return str(hInt) + "h"
 
-    def drawIcon(self, str="--"):
-        icon = QIcon()
+    def drawIconText(self, str="--"):
         pixmap = QPixmap(24, 24)
         pixmap.fill(QColorConstants.Svg.cornflowerblue)
         painter = QPainter(pixmap)
-        # painter.drawText(pixmap.rect(), QtCore.Qt.AlignCenter, "Hi!")
-        # painter.drawText(pixmap.rect(), QtCore.Qt.AlignCenter, "hello")
         painter.setFont(QFont('Arial', 9))
-        # painter.setColor(QColorConstants.White);
-        # painter.setPen(QColorConstants.White);
         painter.setPen(QColor("#FFFF00"))
-
-        # s = 40
-        # painter.drawText(pixmap.rect(), QtCore.Qt.AlignCenter, genText(s))
         painter.drawText(pixmap.rect(), QtCore.Qt.AlignCenter, str)
         painter.end()
         return QIcon(pixmap)
 
     def setIcon(self, str="--"):
-        self.tray.setIcon(self.drawIcon(str))
+        self.tray.setIcon(self.drawIconText(str))
 
     def addTrayIcon(self):
-        # Adding an icon
-        # icon = QIcon("icon.png")
-
         self.tray = QSystemTrayIcon()
 
         show_action = QAction("Show", self)
@@ -97,23 +84,11 @@ class Window(QMainWindow):
 
         # self.tray.activated.connect(self.onTrayIconActivated)
 
-        # Adding options to the System Tray
-        # self.tray.setContextMenu(menu)
         # self.tray.setToolTip("Hi!")
         self.tray.setVisible(True)
 
-    # method for widgets
-
-    def UiComponents(self):
+    def uiComponents(self):
         self.addTrayIcon()
-
-        # # counter
-        # self.count = 0
-
-        # # creating flag
-        # self.running = False
-        # self.paused = False
-
         # creating a label to show the time
         self.label = QLabel(self)
 
@@ -140,7 +115,7 @@ class Window(QMainWindow):
         start.setGeometry(125, 250, 150, 40)
 
         # add action to the method
-        start.pressed.connect(self.Start)
+        start.pressed.connect(self.start)
 
         # creating pause button
         pause = QPushButton("Pause", self)
@@ -149,7 +124,7 @@ class Window(QMainWindow):
         pause.setGeometry(125, 300, 150, 40)
 
         # add action to the method
-        pause.pressed.connect(self.Pause)
+        pause.pressed.connect(self.pause)
 
         # creating reset button
         re_set = QPushButton("Re-set", self)
@@ -158,25 +133,25 @@ class Window(QMainWindow):
         re_set.setGeometry(125, 350, 150, 40)
 
         # add action to the method
-        re_set.pressed.connect(self.Re_set)
+        re_set.pressed.connect(self.reset)
 
         # creating a timer object
         timer = QTimer(self)
 
         # adding action to timer
-        timer.timeout.connect(self.showTime)
+        timer.timeout.connect(self.timeLoop)
 
         # update the timer every tenth second
         timer.start(100)
 
-    def show_count(self):
-        if self.running:
-            text = self.count_to_str()
-            if self.paused:
+    def updateTexts(self):
+        if self.isRunning:
+            text = self.genTextFull()
+            if self.isPaused:
                 text += " paused"
             self.label.setText(text)
-            if not self.paused:
-                self.setIcon(self.genText(self.count / 10))
+            if not self.isPaused:
+                self.setIcon(self.genTextShort())
             else:
                 self.setIcon("p")
         else:
@@ -185,51 +160,35 @@ class Window(QMainWindow):
         
 
     # method called by timer
-    def showTime(self):
+    def timeLoop(self):
 
         # checking if flag is true
-        if self.running and not(self.paused):
+        if self.isRunning and not(self.isPaused):
             # incrementing the counter
             self.count += 1
 
-        # getting text from count
-        
+        self.updateTexts()
 
-        # showing text
-
-        self.show_count()
-
-    def Start(self):
+    def start(self):
 
         # making flag to true
-        self.running = True
-        self.paused = False
+        self.isRunning = True
+        self.isPaused = False
 
-    def Pause(self):
+    def pause(self):
+        self.isPaused = True
 
-        # making flag to False
-        # self.flag = False
-        self.paused = True
+        self.updateTexts()
 
-        # text = str(self.count / 10)
-        # self.label.setText(text + " paused")
-
-        # self.setIcon("p")
-
-        self.show_count()
-
-    def Re_set(self):
-
-        # making flag to false
-        self.running = False
-        self.paused = False
+    def reset(self):
+        self.isRunning = False
+        self.isPaused = False
 
         # reseeting the count
         self.count = 0
 
         # setting text to label
-        # self.label.setText(str(self.count))
-        self.show_count()
+        self.updateTexts()
 
 
 # create pyqt5 app
