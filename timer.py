@@ -157,9 +157,18 @@ class Window(QMainWindow):
 
         exit_button.clicked.connect(qApp.quit)
 
-        self.check_box = QCheckBox('Minimize to Tray on Close', self)
-        self.check_box.setGeometry(125, 550, 250, 40)
-        self.check_box.setChecked(True)
+        # self.check_box = QCheckBox('Minimize to Tray on Close', self)
+        # self.check_box.setGeometry(125, 550, 250, 40)
+        # self.check_box.setChecked(True)
+
+        # creating pause button
+        minimize_button = QPushButton("Minimize to tray", self)
+
+        # setting geometry to the button
+        minimize_button.setGeometry(125, 550, 150, 40)
+
+        # add action to the method
+        minimize_button.pressed.connect(self.hide)
 
         # creating a timer object
         timer = QTimer(self)
@@ -170,16 +179,10 @@ class Window(QMainWindow):
         # update the timer every tenth second
         timer.start(100)
 
-    def closeEvent(self, event):
-        if self.check_box.isChecked():
-            event.ignore()
-            self.hide()
-            # self.tray_icon.showMessage(
-            #     "Tray Program",
-            #     "Application was minimized to Tray",
-            #     QSystemTrayIcon.Information,
-            #     2000
-            # )
+    # def closeEvent(self, event):
+    #     if self.check_box.isChecked():
+    #         event.ignore()
+    #         self.hide()
 
     def timeLoop(self):
         if self.isRunning and not self.isPaused:
