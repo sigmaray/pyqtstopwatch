@@ -4,6 +4,7 @@ from PyQt5 import QtCore
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import QColorConstants
+
 import lib
 
 
@@ -57,7 +58,8 @@ class Window(QMainWindow):
         self.tray.setVisible(True)
 
     def onTrayIconActivated(self, reason):
-        if reason == QSystemTrayIcon.DoubleClick:
+        # if reason == QSystemTrayIcon.DoubleClick:
+        if reason == QSystemTrayIcon.Trigger:
             self.show()
             # if self.windowState() == QtCore.Qt.WindowMinimized:
             self.setWindowState(QtCore.Qt.WindowActive)
@@ -74,25 +76,23 @@ class Window(QMainWindow):
 
         self.label = QLabel(self)
         self.label.setGeometry(75, 100, 250, 70)
-        self.label.setStyleSheet("border : 4px solid " + self.COLOR2 + "; color: " + self.COLOR2 + ";")
+        self.label.setStyleSheet(
+            "border : 4px solid " + self.COLOR2 + "; color: " + self.COLOR2 + ";")
         self.label.setText("--")
         self.label.setFont(QFont('Arial', 25))
         self.label.setAlignment(Qt.AlignCenter)
 
-        buttonStart = QPushButton("Start", self)
-        buttonStart.setGeometry(125, 250, 150, 40)
-        buttonStart.pressed.connect(self.onClickStart)
+        self.buttonStartPause = QPushButton("Start", self)
+        self.buttonStartPause.setGeometry(125, 250, 150, 40)
+        self.buttonStartPause.pressed.connect(self.onClickStartPause)
 
-        buttonPause = QPushButton("Pause", self)
-        buttonPause.setGeometry(125, 300, 150, 40)
-        buttonPause.pressed.connect(self.onClickPause)
-
-        buttonReset = QPushButton("Re-set", self)
-        buttonReset.setGeometry(125, 350, 150, 40)
-        buttonReset.pressed.connect(self.onClickReset)
+        self.buttonReset = QPushButton("Reset", self)
+        self.buttonReset.setGeometry(125, 325, 150, 40)
+        self.buttonReset.pressed.connect(self.onClickReset)
+        self.buttonReset.setDisabled(True)
 
         buttonMinimize = QPushButton("Minimize to tray", self)
-        buttonMinimize.setGeometry(125, 400, 150, 40)
+        buttonMinimize.setGeometry(125, 425, 150, 40)
         buttonMinimize.pressed.connect(self.hide)
 
     def addTimer(self):
@@ -117,15 +117,21 @@ class Window(QMainWindow):
     def onTimer(self):
         if self.isRunning and not(self.isPaused):
             self.count += 1
-
+ 
         self.updateTexts()
 
-    def onClickStart(self):
-        self.isRunning = True
-        self.isPaused = False
-
-    def onClickPause(self):
-        self.isPaused = True
+    def onClickStartPause(self):
+        if self.isRunning == False:
+            self.isPaused = False
+            self.isRunning = True
+            self.buttonStartPause.setText("Pause")
+            self.buttonReset.setDisabled(False)
+        elif not(self.isPaused):
+            self.isPaused = True
+            self.buttonStartPause.setText("Start")
+        elif self.isPaused:
+            self.isPaused = False
+            self.buttonStartPause.setText("Pause")
 
         self.updateTexts()
 
@@ -136,6 +142,10 @@ class Window(QMainWindow):
         self.count = 0
 
         self.updateTexts()
+
+        self.buttonStartPause.setText("Start")
+
+        self.buttonReset.setDisabled(True)
 
 
 App = QApplication(sys.argv)

@@ -7,7 +7,6 @@ from PyQt5.QtCore import *
 from timerEndedDialog import TimeEndedDialog
 import lib
 
-
 class Window(QMainWindow):
     COLOR1 = "#fff"
     COLOR2 = "#000080"
@@ -42,7 +41,8 @@ class Window(QMainWindow):
         self.tray.setVisible(True)
 
     def onTrayIconActivated(self, reason):
-        if reason == QSystemTrayIcon.DoubleClick:
+        # if reason == QSystemTrayIcon.DoubleClick:
+        if reason == QSystemTrayIcon.Trigger:
             self.show()
             # if self.windowState() == QtCore.Qt.WindowMinimized:
             self.setWindowState(QtCore.Qt.WindowActive)
@@ -93,17 +93,15 @@ class Window(QMainWindow):
         self.labelCountdown.setFont(QFont('Times', 15))
         self.labelCountdown.setAlignment(Qt.AlignCenter)
 
-        buttonStart = QPushButton("Start", self)
-        buttonStart.setGeometry(125, 230, 150, 50)
-        buttonStart.clicked.connect(self.onClickStart)
+        self.buttonStartPause = QPushButton("Start", self)
+        self.buttonStartPause.setGeometry(125, 230, 150, 50)
+        self.buttonStartPause.clicked.connect(self.onClickStartPause)
+        self.buttonStartPause.setDisabled(True)
 
-        reset_button = QPushButton("Reset", self)
-        reset_button.setGeometry(125, 300, 150, 50)
-        reset_button.clicked.connect(self.onClickReset)
-
-        buttonPause = QPushButton("Pause", self)
-        buttonPause.setGeometry(125, 370, 150, 50)
-        buttonPause.clicked.connect(self.onClickPause)
+        self.buttonReset = QPushButton("Reset", self)
+        self.buttonReset.setGeometry(125, 300, 150, 50)
+        self.buttonReset.clicked.connect(self.onClickReset)
+        self.buttonReset.setDisabled(True)
 
         buttonMinimize = QPushButton("Minimize to tray", self)
         buttonMinimize.setGeometry(125, 440, 150, 50)
@@ -122,6 +120,8 @@ class Window(QMainWindow):
                 self.updateTexts(True)
                 TimeEndedDialog.run()
                 self.updateTexts()
+                self.buttonStartPause.setDisabled(True)
+                self.buttonReset.setDisabled(True)
 
         if self.isRunning:
             self.updateTexts()
@@ -154,20 +154,33 @@ class Window(QMainWindow):
             self.updateTexts()
 
     def onClickSetStart(self):
-        self.onClickSet()
-        self.onClickStart()
+        self.isRunning = False
 
-    def onClickStart(self):
-        if self.count == 0:
-            self.isRunning = False
-        else:
+        second, done = QInputDialog.getInt(self, 'Seconds', 'Enter Seconds:')
+
+        if done and second > 0:
+            self.count = second * 10
+
             self.isRunning = True
             self.isPaused = False
+
+            self.buttonStartPause.setText("Pause")
+            self.buttonStartPause.setDisabled(False)
+            self.buttonReset.setDisabled(False)
+
             self.updateTexts()
 
-    def onClickPause(self):
-        if self.isRunning:
-            self.isPaused = True
+    def onClickStartPause(self):
+        if self.count == 0:
+            self.isRunning = False
+        else:            
+            if not(self.isPaused):
+                self.isPaused = True
+                self.buttonStartPause.setText("Start")
+            elif self.isPaused:
+                self.isPaused = False
+                self.buttonStartPause.setText("Pause")
+
             self.updateTexts()
 
     def onClickReset(self):
@@ -177,6 +190,8 @@ class Window(QMainWindow):
         self.count = 0
 
         self.updateTexts()
+
+        self.buttonStartPause.setDisabled(True)
 
     # def closeEvent(self, event):
     #     if self.check_box.isChecked():

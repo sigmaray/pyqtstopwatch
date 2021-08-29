@@ -19,7 +19,6 @@ def drawIcon(str="--", textColor = "#000", bgColor = "#fff"):
 def genTextFull(count):
     tdShort = datetime.timedelta(seconds=round(count/10))
     tdFull = datetime.timedelta(seconds=count/10)
-    m = tdFull.microseconds
     mStr = str(round(tdFull.microseconds / 100000))
     return str(tdShort) + "." + mStr
 
