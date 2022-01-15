@@ -1,29 +1,60 @@
+"""Stopwatch with tray icon implemented in PyQT"""
 import sys
-from PyQt5.QtWidgets import *
-from PyQt5 import QtCore
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5.QtGui import QColorConstants
-
+from munch import munchify, Munch
+from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtGui import QFont
+from PyQt5 import QtGui
+from PyQt5.QtWidgets import qApp, QApplication, QAction, QMainWindow, QMessageBox, \
+    QSystemTrayIcon, QMenu, QLabel, QPushButton, QDesktopWidget
 import lib
 
-
 class Window(QMainWindow):
+    """
+    Window of Stopwatch
+    """
+
+    SETTINGS_FILE = "stopwatchd.json"
+
+    # Default settings to be written in json file (if file is absent)
+    DEFAULT_SETTINGS = {
+        "count": 0
+    }
+
+    # Color of text in tray icon
     COLOR1 = "#fff"
+
+    # Background of tray icon, border and font color of label in the window
     COLOR2 = "#6495ED"
 
-    count = 0
-    isRunning = False
-    isPaused = False
+    state = Munch(count=0, isRunning=False, isPaused=False)
+
+    # Grouping all widgets into a single object/namespace
+    widgets = Munch()
 
     def __init__(self):
         super().__init__()
+
+        if lib.instanceAlreadyRunning('stopwatch'):
+            print('Another instance is already running. Exiting')
+            QMessageBox.about(
+                self, "Error", 'Another instance is already running. Exiting')
+            sys.exit()
+
+        self.settings = munchify(lib.readOrWriteSettings(
+            self.SETTINGS_FILE, self.DEFAULT_SETTINGS))
+        self.state.count = self.settings.count
+        if self.state.count > 0:
+            self.state.isRunning = True
+            self.state.isPaused = True
 
         self.setWindowTitle("PythonStopwatch")
 
         self.setGeometry(100, 100, 400, 500)
 
-        self.uiComponents()
+        self.setWindowIcon(QtGui.QIcon(
+            lib.getCurrentDirectory() + "/" + 'stopwatch.png'))
+
+        self.addUiComponents()
 
         self.moveWindowToCenter()
 
@@ -33,121 +64,258 @@ class Window(QMainWindow):
 
         self.show()
 
-    def setTrayText(self, str="--"):
-        self.tray.setIcon(lib.drawIcon(str, self.COLOR1, self.COLOR2))
+    def setTrayText(self, text="--"):
+        """Render text in tray icon"""
+        self.widgets.tray.setIcon(lib.drawIcon(text, self.COLOR1, self.COLOR2))
 
     def addTrayIcon(self):
-        self.tray = QSystemTrayIcon()
+        """Add tray icon with menu"""
+        self.widgets.tray = QSystemTrayIcon() # pylint: disable=attribute-defined-outside-init
 
+        actionStartPause = QAction("Start/Pause", self)
+        actionReset = QAction("Reset", self)
+        actionHide = QAction("Hide", self)
         actionShow = QAction("Show", self)
         actionQuit = QAction("Exit", self)
         actionHide = QAction("Hide", self)
+        actionStartPause.triggered.connect(self.onClickStartPause)
+        actionReset.triggered.connect(self.onClickReset)
         actionShow.triggered.connect(self.show)
         actionHide.triggered.connect(self.hide)
-        actionQuit.triggered.connect(qApp.quit)
+        actionQuit.triggered.connect(self.areYouSureAndClose)
         menu = QMenu()
+        menu.addAction(actionStartPause)
+        menu.addAction(actionReset)
         menu.addAction(actionShow)
         menu.addAction(actionHide)
         menu.addAction(actionQuit)
-        self.tray.setContextMenu(menu)
+        self.widgets.tray.setContextMenu(menu)
 
         self.setTrayText("--")
 
-        self.tray.activated.connect(self.onTrayIconActivated)
+        self.widgets.tray.activated.connect(self.onTrayIconActivated)
 
-        self.tray.setVisible(True)
+        self.widgets.tray.setVisible(True)
 
     def onTrayIconActivated(self, reason):
-        # if reason == QSystemTrayIcon.DoubleClick:
+        """
+        When tray icon is clicked:
+        Show/Hide window if left mouse button is clicked
+        Start/pause if middle mouse button is clicked
+        """
         if reason == QSystemTrayIcon.Trigger:
-            self.show()
-            # if self.windowState() == QtCore.Qt.WindowMinimized:
-            self.setWindowState(QtCore.Qt.WindowActive)
-            self.activateWindow()
+            if self.isHidden():
+                self.show()
+            else:
+                self.hide()
+        elif reason == QSystemTrayIcon.MiddleClick:
+            self.onClickStartPause()
 
     def moveWindowToCenter(self):
+        """
+        Center PyQt window
+        https://pythonprogramminglanguage.com/pyqt5-center-window/
+        """
         qtRectangle = self.frameGeometry()
         centerPoint = QDesktopWidget().availableGeometry().center()
         qtRectangle.moveCenter(centerPoint)
         self.move(qtRectangle.topLeft())
 
-    def uiComponents(self):
+    def addUiComponents(self):
+        """Add UI components and connect them to handler functions"""
         self.addTrayIcon()
 
-        self.label = QLabel(self)
-        self.label.setGeometry(75, 100, 250, 70)
-        self.label.setStyleSheet(
+        self.widgets.label = QLabel(self)
+        self.widgets.label.setGeometry(75, 30, 250, 70)
+        self.widgets.label.setStyleSheet(
             "border : 4px solid " + self.COLOR2 + "; color: " + self.COLOR2 + ";")
-        self.label.setText("--")
-        self.label.setFont(QFont('Arial', 25))
-        self.label.setAlignment(Qt.AlignCenter)
 
-        self.buttonStartPause = QPushButton("Start", self)
-        self.buttonStartPause.setGeometry(125, 250, 150, 40)
-        self.buttonStartPause.pressed.connect(self.onClickStartPause)
+        self.updateTexts()
 
-        self.buttonReset = QPushButton("Reset", self)
-        self.buttonReset.setGeometry(125, 325, 150, 40)
-        self.buttonReset.pressed.connect(self.onClickReset)
-        self.buttonReset.setDisabled(True)
+        self.widgets.label.setFont(QFont('Arial', 25))
+        self.widgets.label.setAlignment(Qt.AlignCenter)
+
+        self.widgets.buttonStartPause = QPushButton("Start", self)
+        self.widgets.buttonStartPause.setGeometry(125, 150, 150, 40)
+        self.widgets.buttonStartPause.pressed.connect(self.onClickStartPause)
+
+        self.widgets.buttonReset = QPushButton("Reset", self)
+        self.widgets.buttonReset.setGeometry(125, 240, 150, 40)
+        self.widgets.buttonReset.pressed.connect(self.onClickReset)
+        self.widgets.buttonReset.setDisabled(not self.state.isRunning)
+
+        buttonMinus1h = QPushButton("-1h", self)
+        buttonMinus1h.setGeometry(10, 330, 50, 40)
+        buttonMinus1h.pressed.connect(self.onClickMinus1h)
+
+        buttonMinus10m = QPushButton("-10m", self)
+        buttonMinus10m.setGeometry(70, 330, 50, 40)
+        buttonMinus10m.pressed.connect(self.onClickMinus10m)
+
+        buttonMinus1m = QPushButton("-1m", self)
+        buttonMinus1m.setGeometry(130, 330, 50, 40)
+        buttonMinus1m.pressed.connect(self.onClickMinus1m)
+
+        buttonPlus1m = QPushButton("+1m", self)
+        buttonPlus1m.setGeometry(220, 330, 50, 40)
+        buttonPlus1m.pressed.connect(self.onClickPlus1m)
+
+        buttonPlus10m = QPushButton("+10m", self)
+        buttonPlus10m.setGeometry(280, 330, 50, 40)
+        buttonPlus10m.pressed.connect(self.onClickPlus10m)
+
+        buttonPlus1h = QPushButton("+1h", self)
+        buttonPlus1h.setGeometry(340, 330, 50, 40)
+        buttonPlus1h.pressed.connect(self.onClickPlus1h)
 
         buttonMinimize = QPushButton("Minimize to tray", self)
-        buttonMinimize.setGeometry(125, 425, 150, 40)
+        buttonMinimize.setGeometry(125, 420, 150, 40)
         buttonMinimize.pressed.connect(self.hide)
 
     def addTimer(self):
+        """Add timer, connect it to handler function, start it"""
         timer = QTimer(self)
         timer.timeout.connect(self.onTimer)
         timer.start(100)
 
     def updateTexts(self):
-        if self.isRunning:
-            text = lib.genTextFull(self.count)
-            if self.isPaused:
+        """Update texts in window and tray icon according to self.state"""
+        if self.state.isRunning:
+            text = '<html>'
+            text += '&nbsp;&nbsp;&nbsp;'
+            text += lib.genTextFull(self.state.count)
+            if self.state.isPaused:
                 text += " p"
-            self.label.setText(text)
-            if not self.isPaused:
-                self.setTrayText(lib.genTextShort(self.count))
+            else:
+                text += "&nbsp;&nbsp;&nbsp;"
+            self.widgets.label.setText(text)
+            text = '</html>'
+            if not self.state.isPaused:
+                self.setTrayText(lib.genTextShort(self.state.count))
             else:
                 self.setTrayText("p")
         else:
             self.setTrayText("--")
-            self.label.setText("--")
+            self.widgets.label.setText("--")
 
     def onTimer(self):
-        if self.isRunning and not(self.isPaused):
-            self.count += 1
- 
-        self.updateTexts()
+        """When timer is triggered: change time counter and update UI"""
+        if self.state.isRunning and not self.state.isPaused:
+            self.changeTimeByDeltaAndUpdateUI(1)
 
     def onClickStartPause(self):
-        if self.isRunning == False:
-            self.isPaused = False
-            self.isRunning = True
-            self.buttonStartPause.setText("Pause")
-            self.buttonReset.setDisabled(False)
-        elif not(self.isPaused):
-            self.isPaused = True
-            self.buttonStartPause.setText("Start")
-        elif self.isPaused:
-            self.isPaused = False
-            self.buttonStartPause.setText("Pause")
+        """
+        When Start/Pause button is pressed
+        * Update values in self.state
+        * Change button text
+        """
+        if not self.state.isRunning:
+            self.state.isPaused = False
+            self.state.isRunning = True
+            self.widgets.buttonStartPause.setText("Pause")
+            self.widgets.buttonReset.setDisabled(False)
+        elif not self.state.isPaused:
+            self.state.isPaused = True
+            self.widgets.buttonStartPause.setText("Start")
+        elif self.state.isPaused:
+            self.state.isPaused = False
+            self.widgets.buttonStartPause.setText("Pause")
 
         self.updateTexts()
 
     def onClickReset(self):
-        self.isRunning = False
-        self.isPaused = False
+        """
+        When Reset button is pressed
+        * Reset values in self.state
+        * Update value in JSON settings file
+        * Change text of Pause button to Start
+        * Disable Reset button
+        """
+        self.state.isRunning = False
+        self.state.isPaused = False
 
-        self.count = 0
+        self.changeTimeToValAndUpdateUI(0)
+
+        self.widgets.buttonStartPause.setText("Start")
+
+        self.widgets.buttonReset.setDisabled(True)
+
+    def changeTimeToValAndUpdateUI(self, newVal):
+        """
+        * Update time counter with new (integer) value.
+        * Write new counter into JSON settings file.
+        * Update UI (texts in window and tray icon)
+        """
+        if newVal < 0:
+            return
+
+        self.settings.count = self.state.count = newVal
+
+        lib.writeSettingsFile(self.SETTINGS_FILE, self.settings)
 
         self.updateTexts()
 
-        self.buttonStartPause.setText("Start")
+    def changeTimeByDeltaAndUpdateUI(self, delta):
+        """
+        Only if not paused:
+        * Add (integer) delta to time counter.
+        * Write new counter into JSON settings file.
+        * Update UI (texts in window and tray icon)
+        """
 
-        self.buttonReset.setDisabled(True)
+        newVal = self.state.count + delta
+
+        if newVal < 0 or not self.state.isRunning:
+            return
+
+        self.changeTimeToValAndUpdateUI(newVal)
+
+    def onClickMinus1h(self):
+        """When -1h button is pressed"""
+        self.changeTimeByDeltaAndUpdateUI(-60 * 10 * 60)
+
+    def onClickMinus10m(self):
+        """When -10m button is pressed"""
+        self.changeTimeByDeltaAndUpdateUI(-60 * 10 * 10)
+
+    def onClickMinus1m(self):
+        """When -1m button is pressed"""
+        self.changeTimeByDeltaAndUpdateUI(-60 * 10)
+
+    def onClickPlus1m(self):
+        """When +1m button is pressed"""
+        self.changeTimeByDeltaAndUpdateUI(60 * 10)
+
+    def onClickPlus10m(self):
+        """When +10m button is pressed"""
+        self.changeTimeByDeltaAndUpdateUI(60 * 10 * 10)
+
+    def onClickPlus1h(self):
+        """When +1h button is pressed"""
+        self.changeTimeByDeltaAndUpdateUI(60 * 10 * 60)
+
+    def closeEvent(self, event):
+        """
+        Overriding PyQt close event.
+        Ask user's confirmation before exiting
+        https://learndataanalysis.org/example-of-how-to-use-the-qwidget-close-event-pyqt5-tutorial/
+        """
+        event.ignore()
+        self.areYouSureAndClose()
+
+    def areYouSureAndClose(self):
+        """
+        Ask user's confirmation and exit
+        """
+        quit_msg = "Are you sure you want to exit the program?"
+        reply = QMessageBox.question(self, 'Message',
+                                     quit_msg, QMessageBox.No, QMessageBox.Yes)
+
+        if reply == QMessageBox.Yes:
+            qApp.quit()
 
 
 App = QApplication(sys.argv)
+App.setQuitOnLastWindowClosed(False)
 window = Window()
 sys.exit(App.exec())
