@@ -19,7 +19,7 @@ class Window(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("PythonStopwatch")
+        self.setWindowTitle("PythonChimes")
 
         self.setGeometry(100, 100, 400, 500)
 
@@ -29,7 +29,7 @@ class Window(QMainWindow):
 
         self.setFixedSize(self.size())
 
-        self.addTimer()
+        # self.addTimer()
 
         self.show()
 
@@ -74,26 +74,57 @@ class Window(QMainWindow):
     def uiComponents(self):
         self.addTrayIcon()
 
-        self.label = QLabel(self)
-        self.label.setGeometry(75, 100, 250, 70)
-        self.label.setStyleSheet(
-            "border : 4px solid " + self.COLOR2 + "; color: " + self.COLOR2 + ";")
-        self.label.setText("--")
-        self.label.setFont(QFont('Arial', 25))
-        self.label.setAlignment(Qt.AlignCenter)
+        # self.label = QLabel(self)
+        # self.label.setGeometry(75, 100, 250, 70)
+        # self.label.setStyleSheet(
+        #     "border : 4px solid " + self.COLOR2 + "; color: " + self.COLOR2 + ";")
+        # self.label.setText("--")
+        # self.label.setFont(QFont('Arial', 25))
+        # self.label.setAlignment(Qt.AlignCenter)
 
-        self.buttonStartPause = QPushButton("Start", self)
-        self.buttonStartPause.setGeometry(125, 250, 150, 40)
-        self.buttonStartPause.pressed.connect(self.onClickStartPause)
+        # self.buttonStartPause = QPushButton("Start", self)
+        # self.buttonStartPause.setGeometry(125, 250, 150, 40)
+        # self.buttonStartPause.pressed.connect(self.onClickStartPause)
 
-        self.buttonReset = QPushButton("Reset", self)
-        self.buttonReset.setGeometry(125, 325, 150, 40)
-        self.buttonReset.pressed.connect(self.onClickReset)
-        self.buttonReset.setDisabled(True)
+        # self.buttonReset = QPushButton("Reset", self)
+        # self.buttonReset.setGeometry(125, 325, 150, 40)
+        # self.buttonReset.pressed.connect(self.onClickReset)
+        # self.buttonReset.setDisabled(True)
 
-        buttonMinimize = QPushButton("Minimize to tray", self)
-        buttonMinimize.setGeometry(125, 425, 150, 40)
-        buttonMinimize.pressed.connect(self.hide)
+        # buttonMinimize = QPushButton("Minimize to tray", self)
+        # buttonMinimize.setGeometry(125, 425, 150, 40)
+        # buttonMinimize.pressed.connect(self.hide)
+
+        self.widget = QWidget()
+        self.layout = QVBoxLayout()
+
+        self.b1 = QCheckBox("Chimes at xx:30 minutes")
+        # self.b1.setChecked(True)
+        self.b1.stateChanged.connect(lambda:self.onb1change(self.b1))
+        self.layout.addWidget(self.b1)
+
+        self.b2 = QCheckBox("Chimes every xx:00 minutes")
+        # self.b2.setChecked(True)
+        self.b2.stateChanged.connect(lambda:self.onb2change(self.b2))
+        self.layout.addWidget(self.b2)
+
+        self.widget.setLayout(self.layout)
+        self.setCentralWidget(self.widget)
+
+        
+        # self.setLayout(self.layout)
+
+    def onb1change(self,b1):
+        if b1.isChecked() == True:
+           print(b1.text()+" is selected")
+        else:
+           print(b1.text()+" is deselected")
+
+    def onb2change(self,b2):
+        if b2.isChecked() == True:
+           print(b2.text()+" is selected")
+        else:
+           print(b2.text()+" is deselected")
 
     def addTimer(self):
         timer = QTimer(self)
