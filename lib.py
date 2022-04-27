@@ -11,7 +11,13 @@ def drawIcon(str="--", textColor = "#000", bgColor = "#fff"):
 
     painter = QPainter(pixmap)
     painter.setPen(QColor(textColor))
-    painter.setFont(QFont('Arial', 10))
+
+    if len(str) > 3:
+        fontSize = 9
+    else:
+        fontSize = 12
+    painter.setFont(QFont('Arial', fontSize))
+
     painter.drawText(pixmap.rect(), QtCore.Qt.AlignCenter, str)
     painter.end()
     return QIcon(pixmap)
