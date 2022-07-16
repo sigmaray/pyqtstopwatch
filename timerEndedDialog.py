@@ -20,6 +20,7 @@ class TimeEndedDialog(QDialog):
 
         self.setStyleSheet(self.genStyle(color))
 
+    # def __init__(self, parent):
     def __init__(self):
         super().__init__()
 
@@ -45,7 +46,10 @@ class TimeEndedDialog(QDialog):
         self.setLayout(dlgLayout)
 
     @staticmethod
+    # def run(parent):
     def run():
+        # parent.show()
+        # dialog = TimeEndedDialog(parent)
         dialog = TimeEndedDialog()
         dialog.exec_()
 

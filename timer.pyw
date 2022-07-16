@@ -162,6 +162,7 @@ class Window(QMainWindow):
             if self.count == 0:
                 self.isRunning = False
                 self.updateTexts(True)
+                # TimeEndedDialog.run(self)
                 TimeEndedDialog.run()
                 self.updateTexts()
                 self.buttonStartPause.setText('Start')
@@ -273,5 +274,6 @@ class Window(QMainWindow):
 
 
 App = QApplication(sys.argv)
+App.setQuitOnLastWindowClosed(False)
 window = Window()
 sys.exit(App.exec())
