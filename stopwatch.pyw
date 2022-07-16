@@ -4,6 +4,8 @@ from PyQt5 import QtCore
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import QColorConstants
+from munch import munchify
+import os
 
 import lib
 
@@ -18,6 +20,16 @@ class Window(QMainWindow):
 
     def __init__(self):
         super().__init__()
+
+        self.settings = munchify(lib.readWriteSettings())
+        self.count = self.settings.count
+        if self.count > 0:
+            self.isRunning = True
+            self.isPaused = True
+
+        if lib.instance_already_running():
+            print('Another instance is already running. Exiting')
+            sys.exit()
 
         self.setWindowTitle("PythonStopwatch")
 
@@ -39,13 +51,20 @@ class Window(QMainWindow):
     def addTrayIcon(self):
         self.tray = QSystemTrayIcon()
 
+        actionStartPause = QAction("Start/Pause", self)
+        actionReset = QAction("Reset", self)
+        actionHide = QAction("Hide", self)        
         actionShow = QAction("Show", self)
         actionQuit = QAction("Exit", self)
         actionHide = QAction("Hide", self)
+        actionStartPause.triggered.connect(self.onClickStartPause)
+        actionReset.triggered.connect(self.onClickReset)
         actionShow.triggered.connect(self.show)
         actionHide.triggered.connect(self.hide)
         actionQuit.triggered.connect(qApp.quit)
         menu = QMenu()
+        menu.addAction(actionStartPause)
+        menu.addAction(actionReset)
         menu.addAction(actionShow)
         menu.addAction(actionHide)
         menu.addAction(actionQuit)
@@ -60,10 +79,13 @@ class Window(QMainWindow):
     def onTrayIconActivated(self, reason):
         # if reason == QSystemTrayIcon.DoubleClick:
         if reason == QSystemTrayIcon.Trigger:
-            self.show()
-            # if self.windowState() == QtCore.Qt.WindowMinimized:
-            self.setWindowState(QtCore.Qt.WindowActive)
-            self.activateWindow()
+            if self.isHidden():
+                self.show()
+            else:
+                self.hide()
+            # # if self.windowState() == QtCore.Qt.WindowMinimized:
+            # self.setWindowState(QtCore.Qt.WindowActive)
+            # self.activateWindow()
 
     def moveWindowToCenter(self):
         qtRectangle = self.frameGeometry()
@@ -78,7 +100,15 @@ class Window(QMainWindow):
         self.label.setGeometry(75, 100, 250, 70)
         self.label.setStyleSheet(
             "border : 4px solid " + self.COLOR2 + "; color: " + self.COLOR2 + ";")
-        self.label.setText("--")
+        
+        
+        # raise Exception(str(self.count))
+        # if self.count != 0:
+        #     self.setTrayText(lib.genTextShort(self.count))
+        # else:
+        #     self.label.setText("--")
+        self.updateTexts()
+
         self.label.setFont(QFont('Arial', 25))
         self.label.setAlignment(Qt.AlignCenter)
 
@@ -89,7 +119,7 @@ class Window(QMainWindow):
         self.buttonReset = QPushButton("Reset", self)
         self.buttonReset.setGeometry(125, 325, 150, 40)
         self.buttonReset.pressed.connect(self.onClickReset)
-        self.buttonReset.setDisabled(True)
+        self.buttonReset.setDisabled(not self.isRunning)
 
         buttonMinimize = QPushButton("Minimize to tray", self)
         buttonMinimize.setGeometry(125, 425, 150, 40)
@@ -117,6 +147,11 @@ class Window(QMainWindow):
     def onTimer(self):
         if self.isRunning and not(self.isPaused):
             self.count += 1
+            # raise Exception(str(self.count))
+            self.settings.count = self.count
+            # if self.count % 10 == 0:
+            if True:
+                lib.writeSettingsFile(self.settings)
  
         self.updateTexts()
 
@@ -139,7 +174,8 @@ class Window(QMainWindow):
         self.isRunning = False
         self.isPaused = False
 
-        self.count = 0
+        self.settings.count = self.count = 0
+        lib.writeSettingsFile(self.settings)
 
         self.updateTexts()
 
