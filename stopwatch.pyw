@@ -170,7 +170,7 @@ class Window(QMainWindow):
 
     def onTimer(self):
         if self.isRunning and not(self.isPaused):
-            self.changeTime(1)
+            self.changeTimeByDelta(1)
  
         # self.updateTexts()
 
@@ -202,11 +202,16 @@ class Window(QMainWindow):
 
         self.buttonReset.setDisabled(True)
 
-    def changeTime(self, delta):
+    def changeTimeByDelta(self, delta):
         print("changeTime, delta: " + str(delta))        
 
-        self.count += delta
-        self.settings.count = self.count
+        newVal = self.count + delta
+
+        if newVal < 0 or not(self.isRunning):
+            return
+
+        self.settings.count = self.count = newVal
+
         # if self.count % 10 == 0:
         if True:
             lib.writeSettingsFile(self.settings)
@@ -215,27 +220,27 @@ class Window(QMainWindow):
 
     def onClickMinus1h(self):
         print("onClickMinus1h")        
-        self.changeTime(-60 * 10 * 60)
+        self.changeTimeByDelta(-60 * 10 * 60)
 
     def onClickMinus10m(self):
         print("onClickMinus10m")
-        self.changeTime(-60 * 10 * 10)
+        self.changeTimeByDelta(-60 * 10 * 10)
 
     def onClickMinus1m(self):
         print("onClickMinus1m")
-        self.changeTime(-60 * 10)
+        self.changeTimeByDelta(-60 * 10)
 
     def onClickPlus1m(self):
         print("onClickPlus1m")
-        self.changeTime(60 * 10)
+        self.changeTimeByDelta(60 * 10)
 
     def onClickPlus10m(self):
         print("onClickPlus10m")
-        self.changeTime(60 * 10 * 10)
+        self.changeTimeByDelta(60 * 10 * 10)
 
     def onClickPlus1h(self):
         print("onClickPlus1h")
-        self.changeTime(60 * 10 * 60)
+        self.changeTimeByDelta(60 * 10 * 60)
 
     def closeEvent(self, event):
         event.ignore()    
