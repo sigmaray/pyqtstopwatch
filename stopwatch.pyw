@@ -9,7 +9,6 @@ import os
 
 import lib
 
-
 class Window(QMainWindow):
     COLOR1 = "#fff"
     COLOR2 = "#6495ED"
@@ -61,7 +60,7 @@ class Window(QMainWindow):
         actionReset.triggered.connect(self.onClickReset)
         actionShow.triggered.connect(self.show)
         actionHide.triggered.connect(self.hide)
-        actionQuit.triggered.connect(qApp.quit)
+        actionQuit.triggered.connect(self.areYouSureAndClose)
         menu = QMenu()
         menu.addAction(actionStartPause)
         menu.addAction(actionReset)
@@ -83,6 +82,8 @@ class Window(QMainWindow):
                 self.show()
             else:
                 self.hide()
+        elif reason == QSystemTrayIcon.MiddleClick:
+            self.onClickStartPause()
             # # if self.windowState() == QtCore.Qt.WindowMinimized:
             # self.setWindowState(QtCore.Qt.WindowActive)
             # self.activateWindow()
@@ -183,6 +184,17 @@ class Window(QMainWindow):
 
         self.buttonReset.setDisabled(True)
 
+    def closeEvent(self, event):
+        event.ignore()    
+        self.areYouSureAndClose()
+
+    def areYouSureAndClose(self):
+        quit_msg = "Are you sure you want to exit the program?"
+        reply = QMessageBox.question(self, 'Message', 
+                        quit_msg, QMessageBox.Yes, QMessageBox.No)
+
+        if reply == QMessageBox.Yes:
+            qApp.quit()    
 
 App = QApplication(sys.argv)
 window = Window()
