@@ -123,21 +123,27 @@ class Window(QMainWindow):
 
         buttonMinus1h = QPushButton("-1h", self)
         buttonMinus1h.setGeometry(10, 330, 50, 40) # xStart: 130, xEnd: 160, xDelta: 10, yStart: 330, yEnd: 370, yDelta: 50
+        buttonMinus1h.pressed.connect(self.onClickMinus1h)
 
         buttonMinus10m = QPushButton("-10m", self)
         buttonMinus10m.setGeometry(70, 330, 50, 40) # xStart: 70, xEnd: 120, xDelta: 10, yStart: 330, yEnd: 370, yDelta: 50
+        buttonMinus10m.pressed.connect(self.onClickMinus10m)
 
         buttonMinus1m = QPushButton("-1m", self)
         buttonMinus1m.setGeometry(130, 330, 50, 40) # xStart: 10, xEnd: 60, xDelta: 10, yStart: 330, yEnd: 370, yDelta: 50
+        buttonMinus1m.pressed.connect(self.onClickMinus1m)
 
         buttonPlus1m = QPushButton("+1m", self)
         buttonPlus1m.setGeometry(220, 330, 50, 40)
+        buttonPlus1m.pressed.connect(self.onClickPlus1m)
 
         buttonPlus10m = QPushButton("+10m", self)
         buttonPlus10m.setGeometry(280, 330, 50, 40)
+        buttonPlus10m.pressed.connect(self.onClickPlus10m)
 
         buttonPlus1h = QPushButton("+1h", self)
         buttonPlus1h.setGeometry(340, 330, 50, 40)
+        buttonPlus1h.pressed.connect(self.onClickPlus1h)
 
         buttonMinimize = QPushButton("Minimize to tray", self)
         buttonMinimize.setGeometry(125, 420, 150, 40)
@@ -164,14 +170,9 @@ class Window(QMainWindow):
 
     def onTimer(self):
         if self.isRunning and not(self.isPaused):
-            self.count += 1
-            # raise Exception(str(self.count))
-            self.settings.count = self.count
-            # if self.count % 10 == 0:
-            if True:
-                lib.writeSettingsFile(self.settings)
+            self.changeTime(1)
  
-        self.updateTexts()
+        # self.updateTexts()
 
     def onClickStartPause(self):
         if self.isRunning == False:
@@ -200,6 +201,41 @@ class Window(QMainWindow):
         self.buttonStartPause.setText("Start")
 
         self.buttonReset.setDisabled(True)
+
+    def changeTime(self, delta):
+        print("changeTime, delta: " + str(delta))        
+
+        self.count += delta
+        self.settings.count = self.count
+        # if self.count % 10 == 0:
+        if True:
+            lib.writeSettingsFile(self.settings)
+
+        self.updateTexts()
+
+    def onClickMinus1h(self):
+        print("onClickMinus1h")        
+        self.changeTime(-60 * 10 * 60)
+
+    def onClickMinus10m(self):
+        print("onClickMinus10m")
+        self.changeTime(-60 * 10 * 10)
+
+    def onClickMinus1m(self):
+        print("onClickMinus1m")
+        self.changeTime(-60 * 10)
+
+    def onClickPlus1m(self):
+        print("onClickPlus1m")
+        self.changeTime(60 * 10)
+
+    def onClickPlus10m(self):
+        print("onClickPlus10m")
+        self.changeTime(60 * 10 * 10)
+
+    def onClickPlus1h(self):
+        print("onClickPlus1h")
+        self.changeTime(60 * 10 * 60)
 
     def closeEvent(self, event):
         event.ignore()    
