@@ -98,10 +98,9 @@ class Window(QMainWindow):
         self.addTrayIcon()
 
         self.label = QLabel(self)
-        self.label.setGeometry(75, 100, 250, 70)
+        self.label.setGeometry(75, 30, 250, 70) # yStart: 30, yEnd: 100, yDelta: 30
         self.label.setStyleSheet(
             "border : 4px solid " + self.COLOR2 + "; color: " + self.COLOR2 + ";")
-        
         
         # raise Exception(str(self.count))
         # if self.count != 0:
@@ -114,16 +113,34 @@ class Window(QMainWindow):
         self.label.setAlignment(Qt.AlignCenter)
 
         self.buttonStartPause = QPushButton("Start", self)
-        self.buttonStartPause.setGeometry(125, 250, 150, 40)
+        self.buttonStartPause.setGeometry(125, 150, 150, 40) # yStart: 150, yEnd: 190, yDelta: 50
         self.buttonStartPause.pressed.connect(self.onClickStartPause)
 
         self.buttonReset = QPushButton("Reset", self)
-        self.buttonReset.setGeometry(125, 325, 150, 40)
+        self.buttonReset.setGeometry(125, 240, 150, 40) # yStart: 240, yEnd: 280, yDelta: 50
         self.buttonReset.pressed.connect(self.onClickReset)
         self.buttonReset.setDisabled(not self.isRunning)
 
+        buttonMinus1h = QPushButton("-1h", self)
+        buttonMinus1h.setGeometry(10, 330, 50, 40) # xStart: 130, xEnd: 160, xDelta: 10, yStart: 330, yEnd: 370, yDelta: 50
+
+        buttonMinus10m = QPushButton("-10m", self)
+        buttonMinus10m.setGeometry(70, 330, 50, 40) # xStart: 70, xEnd: 120, xDelta: 10, yStart: 330, yEnd: 370, yDelta: 50
+
+        buttonMinus1m = QPushButton("-1m", self)
+        buttonMinus1m.setGeometry(130, 330, 50, 40) # xStart: 10, xEnd: 60, xDelta: 10, yStart: 330, yEnd: 370, yDelta: 50
+
+        buttonPlus1m = QPushButton("+1m", self)
+        buttonPlus1m.setGeometry(220, 330, 50, 40)
+
+        buttonPlus10m = QPushButton("+10m", self)
+        buttonPlus10m.setGeometry(280, 330, 50, 40)
+
+        buttonPlus1h = QPushButton("+1h", self)
+        buttonPlus1h.setGeometry(340, 330, 50, 40)
+
         buttonMinimize = QPushButton("Minimize to tray", self)
-        buttonMinimize.setGeometry(125, 425, 150, 40)
+        buttonMinimize.setGeometry(125, 420, 150, 40)
         buttonMinimize.pressed.connect(self.hide)
 
     def addTimer(self):
