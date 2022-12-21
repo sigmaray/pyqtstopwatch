@@ -11,7 +11,8 @@ import lib
 
 class Window(QMainWindow):
     COLOR1 = "#fff"
-    COLOR2 = "#6495ED"
+    # COLOR2 = "#6495ED"
+    COLOR2 = "#000"
 
     count = 0
     isRunning = False

@@ -66,20 +66,21 @@ def validateSettings(settings):
 
     return True
 
-def drawIcon(str="--", textColor = "#000", bgColor = "#fff"):
+def drawIcon(strVal="--", textColor = "#000", bgColor = "#fff"):
     pixmap = QPixmap(24, 24)
     pixmap.fill(QColor(bgColor))
 
     painter = QPainter(pixmap)
     painter.setPen(QColor(textColor))
 
-    if len(str) > 3:
-        fontSize = 9
+    if len(strVal) >= 3:
+        fontSize = 10
     else:
         fontSize = 12
+    # print("fontSize " + str(fontSize) + ", strVal: " + strVal)
     painter.setFont(QFont('Arial', fontSize))
 
-    painter.drawText(pixmap.rect(), QtCore.Qt.AlignCenter, str)
+    painter.drawText(pixmap.rect(), QtCore.Qt.AlignCenter, strVal)
     painter.end()
     return QIcon(pixmap)
 
