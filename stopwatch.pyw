@@ -157,10 +157,15 @@ class Window(QMainWindow):
 
     def updateTexts(self):
         if self.isRunning:
-            text = lib.genTextFull(self.count)
+            text = '<html>'
+            text += '&nbsp;&nbsp;&nbsp;'
+            text += lib.genTextFull(self.count)
             if self.isPaused:
                 text += " p"
+            else:
+                text += "&nbsp;&nbsp;&nbsp;"
             self.label.setText(text)
+            text = '</html>'
             if not self.isPaused:
                 self.setTrayText(lib.genTextShort(self.count))
             else:
