@@ -10,7 +10,7 @@ import fcntl
 
 from pathlib import Path
 
-SETTINGS_FILE = "settings.json"
+SETTINGS_FILE = "pyqtstopwatchd.json"
 
 DEFAULT_SETTINGS = {
     # "cellNum": 15,
@@ -48,7 +48,6 @@ def readWriteSettings():
     return settings
 
 def validateSettings(settings):
-
     # for key in ["checkIsOut", "checkIsColliding"]:
     #     if not(key in settings.keys()) or (type(settings[key]) != bool):
     #         return False
