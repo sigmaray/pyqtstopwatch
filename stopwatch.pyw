@@ -11,8 +11,8 @@ import lib
 
 class Window(QMainWindow):
     COLOR1 = "#fff"
-    # COLOR2 = "#6495ED"
-    COLOR2 = "#000"
+    COLOR2 = "#6495ED"
+    # COLOR2 = "#000"
 
     count = 0
     isRunning = False
@@ -250,7 +250,7 @@ class Window(QMainWindow):
     def areYouSureAndClose(self):
         quit_msg = "Are you sure you want to exit the program?"
         reply = QMessageBox.question(self, 'Message', 
-                        quit_msg, QMessageBox.Yes, QMessageBox.No)
+                        quit_msg, QMessageBox.No, QMessageBox.Yes)
 
         if reply == QMessageBox.Yes:
             qApp.quit()    
