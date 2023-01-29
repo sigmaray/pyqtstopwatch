@@ -29,7 +29,8 @@ class Window(QMainWindow):
         actionHide = QAction("Hide", self)
         actionShow.triggered.connect(self.show)
         actionHide.triggered.connect(self.hide)
-        actionQuit.triggered.connect(qApp.quit)
+        # actionQuit.triggered.connect(qApp.quit)
+        actionQuit.triggered.connect(self.areYouSureAndClose)
 
         menu = QMenu()
         menu.addAction(actionShow)
@@ -46,10 +47,15 @@ class Window(QMainWindow):
     def onTrayIconActivated(self, reason):
         # if reason == QSystemTrayIcon.DoubleClick:
         if reason == QSystemTrayIcon.Trigger:
-            self.show()
-            # if self.windowState() == QtCore.Qt.WindowMinimized:
-            self.setWindowState(QtCore.Qt.WindowActive)
-            self.activateWindow()
+            # self.show()
+            # # if self.windowState() == QtCore.Qt.WindowMinimized:
+            # self.setWindowState(QtCore.Qt.WindowActive)
+            # self.activateWindow()
+
+            if self.isHidden():
+                self.show()
+            else:
+                self.hide()
         elif reason == QSystemTrayIcon.MiddleClick:
             self.onClickStartPause()
 
@@ -64,7 +70,8 @@ class Window(QMainWindow):
 
         # self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
 
-        self.setWindowIcon(QtGui.QIcon('images.png'))
+        # self.setWindowIcon(QtGui.QIcon('images.png'))
+        self.setWindowIcon(QtGui.QIcon(lib.get_current_directory() + "/" + 'images.png'))
 
         self.setWindowTitle("PythonTimer")
 
@@ -142,9 +149,9 @@ class Window(QMainWindow):
         # self.buttonExit.clicked.connect(self.areYouSureAndClose)
         # self.layout.addWidget(self.buttonExit)
 
-        self.check_box = QCheckBox('Close to Tray')
-        self.layout.addWidget(self.check_box)
-        self.layout.addWidget(self.buttonMinimize)
+        # self.check_box = QCheckBox('Close to Tray')
+        # self.layout.addWidget(self.check_box)
+        # self.layout.addWidget(self.buttonMinimize)
 
         self.widget.setLayout(self.layout)
         self.setCentralWidget(self.widget)
@@ -238,7 +245,7 @@ class Window(QMainWindow):
             self.updateTexts()            
 
     def onClickStartPause(self):
-        if self.count == 0 and not(self.isPaused):
+        if self.count == 0 and not(self.isPaused) and not (self.chosenInterval == 0):
             # self.isRunning = False
             self.isRunning = True
             self.count = self.chosenInterval
@@ -268,11 +275,12 @@ class Window(QMainWindow):
 
     def closeEvent(self, event):
         event.ignore()
-        if self.check_box.isChecked():
-            # event.ignore()
-            self.hide()
-        else:
-            self.areYouSureAndClose()
+        # if self.check_box.isChecked():
+        #     # event.ignore()
+        #     self.hide()
+        # else:
+        #     self.areYouSureAndClose()
+        self.areYouSureAndClose()
 
 
 App = QApplication(sys.argv)
