@@ -50,6 +50,8 @@ class Window(QMainWindow):
             # if self.windowState() == QtCore.Qt.WindowMinimized:
             self.setWindowState(QtCore.Qt.WindowActive)
             self.activateWindow()
+        elif reason == QSystemTrayIcon.MiddleClick:
+            self.onClickStartPause()
 
     def moveWindowToCenter(self):
         qtRectangle = self.frameGeometry()
@@ -135,10 +137,10 @@ class Window(QMainWindow):
 
         self.layout.addWidget(self.buttonMinimize)
 
-        self.buttonExit = QPushButton("Exit (not to tray)", self)
-        self.buttonExit.setGeometry(125, 500, 150, 40)
-        self.buttonExit.clicked.connect(self.areYouSureAndClose)
-        self.layout.addWidget(self.buttonExit)
+        # self.buttonExit = QPushButton("Exit (not to tray)", self)
+        # self.buttonExit.setGeometry(125, 500, 150, 40)
+        # self.buttonExit.clicked.connect(self.areYouSureAndClose)
+        # self.layout.addWidget(self.buttonExit)
 
         self.check_box = QCheckBox('Close to Tray')
         self.layout.addWidget(self.check_box)
