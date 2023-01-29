@@ -68,6 +68,10 @@ class Window(QMainWindow):
     def __init__(self):
         super().__init__()
 
+        if lib.instance_already_running('timer'):
+            print('Another instance is already running. Exiting')
+            sys.exit()
+
         # self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
 
         # self.setWindowIcon(QtGui.QIcon('images.png'))

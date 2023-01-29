@@ -116,7 +116,7 @@ def instance_already_running(label="default"):
     released if the file pointer were closed.
     """
     
-    path = get_current_directory() + "/" + 'stopwatch.lock'
+    path = get_current_directory() + "/" + label + '.lock'
 
     fle = Path(path)
     fle.touch(exist_ok=True)

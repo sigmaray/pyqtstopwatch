@@ -1,6 +1,6 @@
 import sys
 from PyQt5.QtWidgets import *
-from PyQt5 import QtCore
+from PyQt5 import QtGui
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import QColorConstants
@@ -27,13 +27,15 @@ class Window(QMainWindow):
             self.isRunning = True
             self.isPaused = True
 
-        if lib.instance_already_running():
+        if lib.instance_already_running('stopwatch'):
             print('Another instance is already running. Exiting')
             sys.exit()
 
         self.setWindowTitle("PythonStopwatch")
 
         self.setGeometry(100, 100, 400, 500)
+
+        self.setWindowIcon(QtGui.QIcon(lib.get_current_directory() + "/" + 'stopwatch.png'))
 
         self.uiComponents()
 
