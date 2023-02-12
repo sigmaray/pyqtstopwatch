@@ -108,6 +108,21 @@ class Window(QMainWindow):
         self.b2.stateChanged.connect(lambda:self.onb2change(self.b2))
         self.layout.addWidget(self.b2)
 
+        self.b3 = QCheckBox("Show dialog (always on top) when time ends")
+        # self.b2.setChecked(True)
+        # self.b2.stateChanged.connect(lambda:self.onb2change(self.b2))
+        self.layout.addWidget(self.b3)
+
+        self.b4 = QCheckBox("Minimize to tray")
+        # self.b2.setChecked(True)
+        # self.b2.stateChanged.connect(lambda:self.onb2change(self.b2))
+        self.layout.addWidget(self.b4)
+
+        self.b5 = QCheckBox("Beep with speaker")
+        # self.b2.setChecked(True)
+        # self.b2.stateChanged.connect(lambda:self.onb2change(self.b2))
+        self.layout.addWidget(self.b5)
+
         self.widget.setLayout(self.layout)
         self.setCentralWidget(self.widget)
 
