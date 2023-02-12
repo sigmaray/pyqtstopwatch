@@ -148,6 +148,35 @@ class Window(QMainWindow):
 
         self.layout.addWidget(self.buttonStartPause)
 
+
+        hlayout = QHBoxLayout()
+
+        self.buttonMinus1h = QPushButton("-1h", self)
+        self.buttonMinus1h.pressed.connect(self.onClickMinus1h)
+        hlayout.addWidget(self.buttonMinus1h)
+
+        self.buttonMinus10m = QPushButton("-10m", self)
+        self.buttonMinus10m.pressed.connect(self.onClickMinus10m)
+        hlayout.addWidget(self.buttonMinus10m)
+
+        self.buttonMinus1m = QPushButton("-1m", self)
+        self.buttonMinus1m.pressed.connect(self.onClickMinus1m)
+        hlayout.addWidget(self.buttonMinus1m)
+
+        self.buttonPlus1m = QPushButton("+1m", self)
+        self.buttonPlus1m.pressed.connect(self.onClickPlus1m)
+        hlayout.addWidget(self.buttonPlus1m)
+
+        self.buttonPlus10m = QPushButton("+10m", self)
+        self.buttonPlus10m.pressed.connect(self.onClickPlus10m)
+        hlayout.addWidget(self.buttonPlus10m)
+
+        self.buttonPlus1h = QPushButton("+1h", self)
+        self.buttonPlus1h.pressed.connect(self.onClickPlus1h)
+        hlayout.addWidget(self.buttonPlus1h)
+
+        self.layout.addLayout(hlayout)
+
         self.buttonReset = QPushButton("Reset", self)
         # self.buttonReset.setGeometry(125, 300, 150, 50)
         self.buttonReset.clicked.connect(self.onClickReset)
@@ -163,6 +192,7 @@ class Window(QMainWindow):
         if not self.isRunning:
             self.buttonStartPause.setDisabled(True)
             self.buttonReset.setDisabled(True)
+            self.minusPlusButtonSetDisabled(True)
 
         # self.buttonExit = QPushButton("Exit (not to tray)", self)
         # self.buttonExit.setGeometry(125, 500, 150, 40)
@@ -200,6 +230,7 @@ class Window(QMainWindow):
                 self.buttonStartPause.setText('Start')
                 # self.buttonStartPause.setDisabled(True)
                 self.buttonReset.setDisabled(True)
+                self.minusPlusButtonSetDisabled(True)
 
         if self.isRunning:
             self.updateTexts()
@@ -250,6 +281,7 @@ class Window(QMainWindow):
             self.buttonStartPause.setText("Start")
             self.buttonStartPause.setDisabled(False)
             self.buttonReset.setDisabled(True)
+            self.minusPlusButtonSetDisabled(True)
 
             self.updateTexts()
 
@@ -266,6 +298,7 @@ class Window(QMainWindow):
             self.buttonStartPause.setText("Pause")
             self.buttonStartPause.setDisabled(False)
             self.buttonReset.setDisabled(False)
+            self.minusPlusButtonSetDisabled(False)
 
             self.updateTexts()            
 
@@ -276,6 +309,7 @@ class Window(QMainWindow):
             self.count = self.chosenInterval
             self.buttonStartPause.setText("Pause")
             self.buttonReset.setDisabled(False)
+            self.minusPlusButtonSetDisabled(False)
         else:            
             if not(self.isPaused):
                 self.isPaused = True
@@ -297,6 +331,61 @@ class Window(QMainWindow):
         # self.buttonStartPause.setDisabled(True)
         self.buttonStartPause.setText('Start')
         self.buttonReset.setDisabled(True)
+        self.minusPlusButtonSetDisabled(True)
+
+    def minusPlusButtonSetDisabled(self, trueOrFalse):
+        buttons = [self.buttonMinus1h, self.buttonMinus10m, self.buttonMinus1m, self.buttonPlus1m, self.buttonPlus10m, self.buttonPlus1h]
+        for button in buttons:
+            button.setDisabled(trueOrFalse)        
+
+    def onClickMinus1h(self):
+        # print("onClickMinus1h")        
+        self.changeTimeByDeltaAndUpdate(-60 * 10 * 60)
+
+    def onClickMinus10m(self):
+        # print("onClickMinus10m")
+        self.changeTimeByDeltaAndUpdate(-60 * 10 * 10)
+
+    def onClickMinus1m(self):
+        # print("onClickMinus1m")
+        self.changeTimeByDeltaAndUpdate(-60 * 10)
+
+    def onClickPlus1m(self):
+        # print("onClickPlus1m")
+        self.changeTimeByDeltaAndUpdate(60 * 10)
+
+    def onClickPlus10m(self):
+        # print("onClickPlus10m")
+        self.changeTimeByDeltaAndUpdate(60 * 10 * 10)
+
+    def onClickPlus1h(self):
+        # print("onClickPlus1h")
+        self.changeTimeByDeltaAndUpdate(60 * 10 * 60)
+
+    # Can change by delta only if it's not paused
+    def changeTimeByDeltaAndUpdate(self, delta):
+        # print("changeTime, delta: " + str(delta))        
+
+        # newVal = self.count + delta
+        newVal = self.chosenInterval + delta
+
+        # if newVal < 0 or not(self.isRunning):
+        #     return
+
+        self.changeTimeByValAndUpdate(newVal)
+
+    def changeTimeByValAndUpdate(self, newVal):
+        # print("changeTimeByValAndUpdate, newVal: " + str(newVal))
+
+        if newVal < 0:
+            return
+
+        self.settings.chosenInterval = self.chosenInterval = newVal
+
+        lib.writeSettingsFile(self.SETTINGS_FILE, self.settings)
+
+        self.updateTexts()
+
 
     def closeEvent(self, event):
         event.ignore()
