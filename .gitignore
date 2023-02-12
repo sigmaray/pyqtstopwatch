@@ -136,3 +136,12 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+##############################
+
+todo-chimes.txt
+settings.json
+pyqtstopwatchd.json
+pyqtstopwatch.json
+timer.lock
+stopwatch.lock
