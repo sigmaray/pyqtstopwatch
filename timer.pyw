@@ -3,12 +3,19 @@ from PyQt5.QtWidgets import *
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+from munch import munchify
 
 from timerEndedDialog import TimeEndedDialog
 import lib
 import parseString
 
 class Window(QMainWindow):
+    SETTINGS_FILE = "timerd.json"
+    DEFAULT_SETTINGS = {
+        "count": 0,
+        "chosenInterval": None
+    }
+
     COLOR1 = "#fff"
     # COLOR2 = "#000080"
     COLOR2 = "#000"
@@ -72,6 +79,13 @@ class Window(QMainWindow):
             print('Another instance is already running. Exiting')
             sys.exit()
 
+        self.settings = munchify(lib.readWriteSettings(self.SETTINGS_FILE, self.DEFAULT_SETTINGS))
+        self.count = self.settings.count
+        self.chosenInterval = self.settings.chosenInterval
+        if self.count > 0 and self.chosenInterval > 0:
+            self.isRunning = True
+            self.isPaused = True
+
         # self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
 
         # self.setWindowIcon(QtGui.QIcon('images.png'))
@@ -131,14 +145,12 @@ class Window(QMainWindow):
         self.buttonStartPause = QPushButton("Start", self)
         # self.buttonStartPause.setGeometry(125, 230, 150, 50)
         self.buttonStartPause.clicked.connect(self.onClickStartPause)
-        self.buttonStartPause.setDisabled(True)
 
         self.layout.addWidget(self.buttonStartPause)
 
         self.buttonReset = QPushButton("Reset", self)
         # self.buttonReset.setGeometry(125, 300, 150, 50)
         self.buttonReset.clicked.connect(self.onClickReset)
-        self.buttonReset.setDisabled(True)
 
         self.layout.addWidget(self.buttonReset)
 
@@ -147,6 +159,10 @@ class Window(QMainWindow):
         self.buttonMinimize.pressed.connect(self.hide)
 
         self.layout.addWidget(self.buttonMinimize)
+
+        if not self.isRunning:
+            self.buttonStartPause.setDisabled(True)
+            self.buttonReset.setDisabled(True)
 
         # self.buttonExit = QPushButton("Exit (not to tray)", self)
         # self.buttonExit.setGeometry(125, 500, 150, 40)
@@ -170,7 +186,10 @@ class Window(QMainWindow):
 
     def onTimer(self):
         if self.isRunning and not self.isPaused:
-            self.count -= 1
+            # self.count -= 1
+            self.settings.count = self.count = self.count - 1
+
+            lib.writeSettingsFile(self.SETTINGS_FILE, self.settings)
 
             if self.count == 0:
                 self.isRunning = False
@@ -222,7 +241,8 @@ class Window(QMainWindow):
         v, done = self.askTime()
 
         if done and v > 0:
-            self.chosenInterval = v * 10
+            self.settings.chosenInterval = self.chosenInterval = v * 10
+            lib.writeSettingsFile(self.SETTINGS_FILE, self.settings)
 
             self.isRunning = False
             self.isPaused = False
@@ -237,7 +257,8 @@ class Window(QMainWindow):
         v, done = self.askTime()
 
         if done and v > 0:
-            self.chosenInterval = self.count = v * 10
+            self.settings.chosenInterval = self.chosenInterval = self.count = v * 10
+            lib.writeSettingsFile(self.SETTINGS_FILE, self.settings)
 
             self.isRunning = True
             self.isPaused = False
