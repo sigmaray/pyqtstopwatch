@@ -145,3 +145,6 @@ pyqtstopwatchd.json
 pyqtstopwatch.json
 timer.lock
 stopwatch.lock
+timerd.json
+stopwatchd.json
+
