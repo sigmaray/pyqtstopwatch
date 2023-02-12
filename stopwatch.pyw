@@ -10,6 +10,11 @@ import os
 import lib
 
 class Window(QMainWindow):
+    SETTINGS_FILE = "stopwatchd.json"
+    DEFAULT_SETTINGS = {
+        "count": 0
+    }
+
     COLOR1 = "#fff"
     COLOR2 = "#6495ED"
     # COLOR2 = "#000"
@@ -21,15 +26,15 @@ class Window(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.settings = munchify(lib.readWriteSettings())
+        if lib.instance_already_running('stopwatch'):
+            print('Another instance is already running. Exiting')
+            sys.exit()
+
+        self.settings = munchify(lib.readWriteSettings(self.SETTINGS_FILE, self.DEFAULT_SETTINGS))
         self.count = self.settings.count
         if self.count > 0:
             self.isRunning = True
             self.isPaused = True
-
-        if lib.instance_already_running('stopwatch'):
-            print('Another instance is already running. Exiting')
-            sys.exit()
 
         self.setWindowTitle("PythonStopwatch")
 
@@ -211,20 +216,20 @@ class Window(QMainWindow):
         self.buttonReset.setDisabled(True)
 
     def changeTimeByValAndUpdate(self, newVal):
-        print("changeTimeByValAndUpdate, newVal: " + str(newVal))
+        # print("changeTimeByValAndUpdate, newVal: " + str(newVal))
 
         if newVal < 0:
             return
 
         self.settings.count = self.count = newVal
 
-        lib.writeSettingsFile(self.settings)
+        lib.writeSettingsFile(self.SETTINGS_FILE, self.settings)
 
         self.updateTexts()
 
     # Can change by delta only if it's not paused
     def changeTimeByDeltaAndUpdate(self, delta):
-        print("changeTime, delta: " + str(delta))        
+        # print("changeTime, delta: " + str(delta))        
 
         newVal = self.count + delta
 
@@ -234,27 +239,27 @@ class Window(QMainWindow):
         self.changeTimeByValAndUpdate(newVal)
 
     def onClickMinus1h(self):
-        print("onClickMinus1h")        
+        # print("onClickMinus1h")        
         self.changeTimeByDeltaAndUpdate(-60 * 10 * 60)
 
     def onClickMinus10m(self):
-        print("onClickMinus10m")
+        # print("onClickMinus10m")
         self.changeTimeByDeltaAndUpdate(-60 * 10 * 10)
 
     def onClickMinus1m(self):
-        print("onClickMinus1m")
+        # print("onClickMinus1m")
         self.changeTimeByDeltaAndUpdate(-60 * 10)
 
     def onClickPlus1m(self):
-        print("onClickPlus1m")
+        # print("onClickPlus1m")
         self.changeTimeByDeltaAndUpdate(60 * 10)
 
     def onClickPlus10m(self):
-        print("onClickPlus10m")
+        # print("onClickPlus10m")
         self.changeTimeByDeltaAndUpdate(60 * 10 * 10)
 
     def onClickPlus1h(self):
-        print("onClickPlus1h")
+        # print("onClickPlus1h")
         self.changeTimeByDeltaAndUpdate(60 * 10 * 60)
 
     def closeEvent(self, event):

@@ -12,42 +12,33 @@ from pathlib import Path
 
 SETTINGS_FILE = "pyqtstopwatchd.json"
 
-DEFAULT_SETTINGS = {
-    # "cellNum": 15,
-    # "intervalMilliseconds": 150,
-    # "checkIsOut": False,
-    # "checkIsColliding": False,
-    # "autoStart": True
-    "count": 0
-}
+def doSettingsExist(settings_file_path):
+    return os.path.isfile(get_current_directory() + "/" + settings_file_path)
 
-def doSettingsExist():
-    return os.path.isfile(get_current_directory() + "/" + SETTINGS_FILE)
-
-def writeSettingsFile(hashmap):
-    with open(get_current_directory() + "/" + SETTINGS_FILE, 'w') as f:
+def writeSettingsFile(settings_file_path, hashmap):
+    with open(get_current_directory() + "/" + settings_file_path, 'w') as f:
         f.write(json.dumps(hashmap))
 
-def readSettingsFile():
-    with open(get_current_directory() + "/" + SETTINGS_FILE) as f:
+def readSettingsFile(settings_file_path):
+    with open(get_current_directory() + "/" + settings_file_path) as f:
         return json.load(f)
 
-def readWriteSettings():
-    if not doSettingsExist():
-        print("settings.json does not exist, creating it")
-        writeSettingsFile(DEFAULT_SETTINGS)
+def readWriteSettings(settings_file_path, default_settings):
+    if not doSettingsExist(settings_file_path):
+        print(settings_file_path + " does not exist, creating it")
+        writeSettingsFile(settings_file_path, default_settings)
 
-    settings = readSettingsFile()
+    settings = readSettingsFile(settings_file_path)
 
-    if not validateSettings(settings):
-        print("settings.json is not valid. " +
+    if not validateSettings(settings, default_settings):
+        print(settings_file_path + " is not valid. " +
               "You can delete it and restart the application. " +
               "App will recreate settings file if it's not present")
         sys.exit()
 
     return settings
 
-def validateSettings(settings):
+def validateSettings(settings, default_settings):
     # for key in ["checkIsOut", "checkIsColliding"]:
     #     if not(key in settings.keys()) or (type(settings[key]) != bool):
     #         return False
@@ -59,9 +50,10 @@ def validateSettings(settings):
     # if settings["cellNum"] < 2:
     #     return False
 
-    key = "count"
-    if not(key in settings.keys()) or (type(settings[key]) != int) or (settings[key] < 0):
-        return False
+    for key in default_settings.keys():
+        # key = "count"
+        if not(key in settings.keys()): # or (type(settings[key]) != int) or (settings[key] < 0):
+            return False
 
     return True
 
