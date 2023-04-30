@@ -28,6 +28,7 @@ class Window(QMainWindow):
 
         if lib.instance_already_running('stopwatch'):
             print('Another instance is already running. Exiting')
+            QMessageBox.about(self, "Error", 'Another instance is already running. Exiting')
             sys.exit()
 
         self.settings = munchify(lib.readWriteSettings(self.SETTINGS_FILE, self.DEFAULT_SETTINGS))
@@ -275,5 +276,6 @@ class Window(QMainWindow):
             qApp.quit()    
 
 App = QApplication(sys.argv)
+App.setQuitOnLastWindowClosed(False)
 window = Window()
 sys.exit(App.exec())
