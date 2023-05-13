@@ -10,23 +10,28 @@ from PyQt5.QtGui import QPixmap, QColor, QPainter, QFont, QIcon
 
 SETTINGS_FILE = "pyqtstopwatchd.json"
 
+
 def fullPath(fileName):
     """Append current directory (that contains script) to file name"""
     return getCurrentDirectory() + "/" + fileName
 
+
 def doFileExist(fileName):
     """Check if file with fileName exists in current directory"""
     return os.path.isfile(fullPath(fileName))
+
 
 def writeSettingsFile(fileName, hashmap):
     """Write hashmap into JSON file with fileName"""
     with open(file=fullPath(fileName), mode='w', encoding="utf-8") as f:
         f.write(json.dumps(hashmap))
 
+
 def readSettingsFile(fileName):
     """Parse JSON file with fileName into a hashmap"""
     with open(file=fullPath(fileName), encoding="utf-8") as f:
         return json.load(f)
+
 
 def readOrWriteSettings(settingsFilePath, defaultSettings):
     """
@@ -48,15 +53,17 @@ def readOrWriteSettings(settingsFilePath, defaultSettings):
 
     return settings
 
+
 def validateSettings(settings, defaultSettings):
     """Validate hashmap with parsed settings. Ensure that all keys are present"""
     for key in defaultSettings.keys():
-        if not key in settings.keys(): # or (type(settings[key]) != int) or (settings[key] < 0):
+        if not key in settings.keys():  # or (type(settings[key]) != int) or (settings[key] < 0):
             return False
 
     return True
 
-def drawIcon(strVal="--", textColor = "#000", bgColor = "#fff"):
+
+def drawIcon(strVal="--", textColor="#000", bgColor="#fff"):
     """Render string into QIcon to be shown in tray"""
     pixmap = QPixmap(24, 24)
     pixmap.fill(QColor(bgColor))
@@ -74,12 +81,14 @@ def drawIcon(strVal="--", textColor = "#000", bgColor = "#fff"):
     painter.end()
     return QIcon(pixmap)
 
+
 def genTextFull(count):
     """Convert int value into full time to be shown in window"""
-    tdShort = datetime.timedelta(seconds=round(count/10))
-    tdFull = datetime.timedelta(seconds=count/10)
+    tdShort = datetime.timedelta(seconds=round(count / 10))
+    tdFull = datetime.timedelta(seconds=count / 10)
     mStr = str(round(tdFull.microseconds / 100000))
     return str(tdShort) + "." + mStr
+
 
 def genTextShort(count):
     """Convert int value into short time to be shown in tray"""
@@ -99,6 +108,7 @@ def genTextShort(count):
         return str(round(hFloat, 1)) + "h"
 
     return str(hInt) + "h"
+
 
 def instanceAlreadyRunning(label="default"):
     """
@@ -128,6 +138,7 @@ def instanceAlreadyRunning(label="default"):
         alreadyRunning = True
 
     return alreadyRunning
+
 
 def getCurrentDirectory():
     """Get current directory (that contains python script)"""
