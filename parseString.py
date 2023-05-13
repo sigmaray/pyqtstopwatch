@@ -99,14 +99,15 @@ def isStringValid(userInput):
 
     w = withoutQualifier(stripped)
 
-    # Minimal allowed interval is 1s/1m/1h/1d/1w/1m/1y
-    # TODO: allow intervals like 0.5m or 0.5h
-    return float(w) >= 1
+    # Minimal allowed interval is 0.1s/0.1m/0.1h/0.1d/0.1w/0.1m/0.1y
+    return float(w) >= 0.1
 
 # If this file is launched (instead of including) run tests (for development purposes)
 # TODO: move it into unit test
 if __name__ == "__main__":
     stringsValid = [
+    	'0.1',
+    	'0.5s',
         '1',
         '1 ',
         ' 1 ',
