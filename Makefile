@@ -2,16 +2,17 @@ SHELL=/bin/bash
 
 .PHONY: timer
 timer:
-	./.venv/bin/python3 ./timer.pyw
+	python3 ./timer.pyw
 
 .PHONY: stopwatch
 stopwatch:
-	./.venv/bin/python3 ./stopwatch.pyw
+	python3 ./stopwatch.pyw
 
 .PHONY: createvenv
 createvenv:
 	python3 -m venv .venv
 
+.PHONY: usevenv
 usevenv:
 	@echo "You should run << source .venv/bin/activate >>"
 
@@ -19,3 +20,15 @@ usevenv:
 pipinstall:
 	pip install --upgrade pip
 	pip install -r requirements.txt 
+
+.PHONY: docker-build
+docker-build:
+	docker build -t pyqtstopwatch .
+
+.PHONY: docker-run
+docker-run:
+	docker run -it -p 8080:8080 pyqtstopwatch
+
+.PHONY: docker-build-and-run
+docker-build-and-run:
+	docker build -t pyqtstopwatch . && docker run -it -p 8080:8080 pyqtstopwatch
