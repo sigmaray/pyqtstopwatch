@@ -52,7 +52,7 @@ class Window(QMainWindow):
         self.setGeometry(100, 100, 400, 500)
 
         self.setWindowIcon(QtGui.QIcon(
-            lib.getCurrentDirectory() + "/" + 'stopwatch.png'))
+            lib.getCurrentDirectory() + "/stopwatch/" + 'icon.png'))
 
         self.addUiComponents()
 

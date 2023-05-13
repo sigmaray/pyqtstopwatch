@@ -5,10 +5,10 @@ from PyQt5.QtWidgets import QMainWindow, qApp, QApplication, QDesktopWidget, QWi
 from PyQt5.QtGui import QFont, QIcon
 from PyQt5.QtCore import Qt, QTimer
 from munch import munchify, Munch
-from timerEndedDialog import TimeEndedDialog
 import lib
+sys.path.append('./timer')
 import parseString
-
+from timerEndedDialog import TimeEndedDialog
 
 class Window(QMainWindow):
     """
@@ -54,7 +54,7 @@ class Window(QMainWindow):
         # self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
 
         self.setWindowIcon(QIcon(
-            lib.getCurrentDirectory() + "/" + 'images.png'))
+            lib.getCurrentDirectory() + "/timer/" + 'icon.png'))
 
         self.setWindowTitle("PythonTimer")
 
