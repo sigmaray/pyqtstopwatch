@@ -3,7 +3,6 @@ import sys
 import datetime
 import os
 import json
-from pathlib import Path
 from PyQt5 import QtCore
 from PyQt5.QtGui import QPixmap, QColor, QPainter, QFont, QIcon
 
@@ -45,7 +44,8 @@ def readOrWriteSettings(settingsFilePath, defaultSettings):
     settings = readSettingsFile(settingsFilePath)
 
     if not validateSettings(settings, defaultSettings):
-        print(settingsFilePath + " is not valid. " +
+        print(settingsFilePath +
+              " is not valid. " +
               "You can delete it and restart the application. " +
               "App will recreate settings file if it's not present")
         sys.exit()
@@ -109,41 +109,6 @@ def genTextShort(count):
     return str(hInt) + "h"
 
 
-def instanceAlreadyRunning(label="default"):
-    """
-    Detect if an an instance with the label is already running, globally
-    at the operating system level.
-
-    Using `os.open` ensures that the file pointer won't be closed
-    by Python's garbage collector after the function's scope is exited.
-
-    The lock will be released when the program exits, or could be
-    released if the file pointer were closed.
-
-    https://stackoverflow.com/a/384493
-    """
-    # In Windows fcntl is not implemented
-    if sys.platform == "win32":
-        return False
-
-    import fcntl  # pylint: disable=import-outside-toplevel
-
-    path = getCurrentDirectory() + "/" + label + '.lock'
-
-    fle = Path(path)
-    fle.touch(exist_ok=True)
-
-    lockFilePointer = os.open(path, os.O_WRONLY)
-
-    try:
-        fcntl.lockf(lockFilePointer, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        alreadyRunning = False
-    except IOError:
-        alreadyRunning = True
-
-    return alreadyRunning
-
-
 def getCurrentDirectory():
     """Get current directory (that contains python script)"""
-    return os.path.dirname(os.path.realpath(__file__))
+    return os.path.dirname(os.path.realpath(__file__)).replace("/include", "")

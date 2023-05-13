@@ -1,24 +1,26 @@
 """Timer with tray icon implemented in PyQT"""
-import sys
 from PyQt5.QtWidgets import QMainWindow, qApp, QApplication, QDesktopWidget, QWidget, QVBoxLayout,\
     QPushButton, QLabel, QHBoxLayout, QSystemTrayIcon, QAction, QMenu, QInputDialog, QMessageBox
 from PyQt5.QtGui import QFont, QIcon
 from PyQt5.QtCore import Qt, QTimer
 from munch import munchify, Munch
-
-import lib
+import sys
 
 sys.path.append('./timer')
 from timerEndedDialog import TimeEndedDialog
 import parseString
+sys.path.append('./include')
+import helpers
+from single_instance_windows import SingleInstanceWindows
+from single_instance_unix import SingleInstanceUnix
 
 
-class Window(QMainWindow):
+class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
     """
     Main window of Timer
     """
 
-    SETTINGS_FILE = "timerd.json"
+    SETTINGS_FILE = "timer.json"
 
     # Default settings to be written in json file (if file is absent)
     DEFAULT_SETTINGS = {
@@ -40,13 +42,13 @@ class Window(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        if lib.instanceAlreadyRunning('timer'):
+        if self.isAlreadyRunningUnix() or self.isAlreadyRunningWindows():
             print('Another instance is already running. Exiting')
             QMessageBox.about(
                 self, "Error", 'Another instance is already running. Exiting')
             sys.exit()
 
-        self.settings = munchify(lib.readOrWriteSettings(
+        self.settings = munchify(helpers.readOrWriteSettings(
             self.SETTINGS_FILE, self.DEFAULT_SETTINGS))
         self.state.count = self.settings.count
         self.state.chosenInterval = self.settings.chosenInterval
@@ -57,7 +59,7 @@ class Window(QMainWindow):
         # self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
 
         self.setWindowIcon(QIcon(
-            lib.getCurrentDirectory() + "/timer/" + 'icon.png'))
+            helpers.getCurrentDirectory() + "/timer/" + 'icon.png'))
 
         self.setWindowTitle("PythonTimer")
 
@@ -75,7 +77,7 @@ class Window(QMainWindow):
 
     def setTrayText(self, text="--"):
         """Render text in tray icon"""
-        self.widgets.tray.setIcon(lib.drawIcon(text, self.COLOR1, self.COLOR2))
+        self.widgets.tray.setIcon(helpers.drawIcon(text, self.COLOR1, self.COLOR2))
 
     def addTrayIcon(self):
         """Adds tray icon with menu"""
@@ -239,7 +241,7 @@ class Window(QMainWindow):
         if self.state.isRunning and not self.state.isPaused:
             self.settings.count = self.state.count = self.state.count - 1
 
-            lib.writeSettingsFile(self.SETTINGS_FILE, self.settings)
+            helpers.writeSettingsFile(self.SETTINGS_FILE, self.settings)
 
             if self.state.count == 0:
                 self.state.isRunning = False
@@ -259,12 +261,12 @@ class Window(QMainWindow):
             self.widgets.labelCountdown.setText("Completed !!!! ")
             self.setTrayText("!!!")
         elif self.state.isRunning:
-            text = lib.genTextFull(self.state.count)
+            text = helpers.genTextFull(self.state.count)
             if self.state.isPaused:
                 text += " p"
             self.widgets.labelCountdown.setText("countdown: " + text)
             if not self.state.isPaused:
-                self.setTrayText(lib.genTextShort(self.state.count))
+                self.setTrayText(helpers.genTextShort(self.state.count))
             else:
                 self.setTrayText("p")
         else:
@@ -273,7 +275,7 @@ class Window(QMainWindow):
 
         if self.state.chosenInterval > 0:
             self.widgets.labelTimeSet.setText(
-                "time set: " + lib.genTextFull(self.state.chosenInterval))
+                "time set: " + helpers.genTextFull(self.state.chosenInterval))
 
     def parseInputtedValue(self, value):
         """
@@ -300,7 +302,7 @@ class Window(QMainWindow):
 
         if done and v > 0:
             self.settings.chosenInterval = self.state.chosenInterval = v * 10
-            lib.writeSettingsFile(self.SETTINGS_FILE, self.settings)
+            helpers.writeSettingsFile(self.SETTINGS_FILE, self.settings)
 
             self.state.isRunning = False
             self.state.isPaused = False
@@ -318,7 +320,7 @@ class Window(QMainWindow):
 
         if done and v > 0:
             self.settings.chosenInterval = self.state.chosenInterval = self.state.count = v * 10
-            lib.writeSettingsFile(self.SETTINGS_FILE, self.settings)
+            helpers.writeSettingsFile(self.SETTINGS_FILE, self.settings)
 
             self.state.isRunning = True
             self.state.isPaused = False
@@ -416,7 +418,7 @@ class Window(QMainWindow):
 
         self.settings.count = self.state.count = newVal
 
-        lib.writeSettingsFile(self.SETTINGS_FILE, self.settings)
+        helpers.writeSettingsFile(self.SETTINGS_FILE, self.settings)
 
         self.updateTexts()
 
@@ -432,5 +434,5 @@ class Window(QMainWindow):
 
 App = QApplication(sys.argv)
 App.setQuitOnLastWindowClosed(False)
-window = Window()
+window = Timer()
 sys.exit(App.exec())
