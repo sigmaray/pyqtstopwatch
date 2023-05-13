@@ -14,7 +14,6 @@ class TimeEndedDialog(QDialog):
     # Current background color index
     colorIndex = 0
 
-    # def __init__(self, parent):
     def __init__(self):
         super().__init__()
 
@@ -60,6 +59,7 @@ class TimeEndedDialog(QDialog):
         """Create and show dialog"""
         dialog = TimeEndedDialog()
         dialog.exec_()
+
 
 # If this file is launched (instead of including) render dialog (for development purposes)
 if __name__ == "__main__":

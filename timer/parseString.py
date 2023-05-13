@@ -1,5 +1,6 @@
 """Module that parses time interval inputted by user (is used in timer.pyw)"""
 
+
 def doesEndWithQualifier(userInput):
     """
     Determine if time interval inputted by user ends with 's'/'m'/'h'/'d'/'w'
@@ -10,6 +11,7 @@ def doesEndWithQualifier(userInput):
         return False
     last = userInput[len(userInput) - 1]
     return last in ['s', 'm', 'h', 'd', 'w']
+
 
 def withoutQualifier(userInput):
     """
@@ -29,7 +31,8 @@ def withoutQualifier(userInput):
 
     return float(stripped[:-1])
 
-def getQualifierMult(userInput): # pylint: disable=too-many-return-statements
+
+def getQualifierMult(userInput):  # pylint: disable=too-many-return-statements
     """
     Determine multiplier for a string inputted by user
     If user input doesn't have 's'/'m'/'h'/'d'/'w' in the end return 1
@@ -56,15 +59,16 @@ def getQualifierMult(userInput): # pylint: disable=too-many-return-statements
         return 60
 
     if mult == 'h':
-        return 60*60
+        return 60 * 60
 
     if mult == 'd':
-        return 60*60*24
+        return 60 * 60 * 24
 
     if mult == 'w':
-        return 60*60*24*7
+        return 60 * 60 * 24 * 7
 
     return 1
+
 
 def isStringValid(userInput):
     """
@@ -79,21 +83,21 @@ def isStringValid(userInput):
         return False
 
     for i, c in enumerate(stripped):
-        isLast = i == (len(stripped) - 1) # is symbol in the end of string
-        isFirst = i == 0 # is symbol in the begin of string
+        isLast = i == (len(stripped) - 1)  # is symbol in the end of string
+        isFirst = i == 0  # is symbol in the begin of string
         if isFirst:
             # Check if symbol is allowd in the begin of string
-            listFirst = list(map(str, range(0,10)))
+            listFirst = list(map(str, range(0, 10)))
             if not c in listFirst:
                 return False
         elif isLast:
             # Check if symbol is allowd in the end of string
-            listLast = list(map(str, range(0,10))) + ['s', 'm', 'h', 'd', 'w', 'm', 'y']
+            listLast = list(map(str, range(0, 10))) + ['s', 'm', 'h', 'd', 'w', 'm', 'y']
             if not c in listLast:
                 return False
         else:
             # Check if symbol is allowd in the middle of string
-            listMiddle = list(map(str, range(0,10))) + ['.', ',']
+            listMiddle = list(map(str, range(0, 10))) + ['.', ',']
             if not c in listMiddle:
                 return False
 
@@ -102,12 +106,13 @@ def isStringValid(userInput):
     # Minimal allowed interval is 0.1s/0.1m/0.1h/0.1d/0.1w/0.1m/0.1y
     return float(w) >= 0.1
 
+
 # If this file is launched (instead of including) run tests (for development purposes)
 # TODO: move it into unit test
 if __name__ == "__main__":
     stringsValid = [
-    	'0.1',
-    	'0.5s',
+        '0.1',
+        '0.5s',
         '1',
         '1 ',
         ' 1 ',

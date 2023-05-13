@@ -5,10 +5,13 @@ from PyQt5.QtWidgets import QMainWindow, qApp, QApplication, QDesktopWidget, QWi
 from PyQt5.QtGui import QFont, QIcon
 from PyQt5.QtCore import Qt, QTimer
 from munch import munchify, Munch
+
 import lib
+
 sys.path.append('./timer')
-import parseString
 from timerEndedDialog import TimeEndedDialog
+import parseString
+
 
 class Window(QMainWindow):
     """
@@ -29,7 +32,7 @@ class Window(QMainWindow):
     # Background of tray icon, border and font color of label in the window
     COLOR2 = "#000"
 
-    state = Munch(chosenInterval = 0, count = 0, isRunning = False, isPaused = False,)
+    state = Munch(chosenInterval=0, count=0, isRunning=False, isPaused=False,)
 
     # Grouping all widgets into a single object/namespace
     widgets = Munch()
@@ -128,7 +131,7 @@ class Window(QMainWindow):
         timer.timeout.connect(self.onTimer)
         timer.start(100)
 
-    def addUiComponents(self): # pylint: disable=too-many-statements
+    def addUiComponents(self):  # pylint: disable=too-many-statements
         """Add UI components and connect them to handler functions"""
         layout = QVBoxLayout()
 

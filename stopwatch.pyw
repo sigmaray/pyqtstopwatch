@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import qApp, QApplication, QAction, QMainWindow, QMessageBo
     QSystemTrayIcon, QMenu, QLabel, QPushButton, QDesktopWidget
 import lib
 
+
 class Window(QMainWindow):
     """
     Window of Stopwatch
@@ -70,7 +71,7 @@ class Window(QMainWindow):
 
     def addTrayIcon(self):
         """Add tray icon with menu"""
-        self.widgets.tray = QSystemTrayIcon() # pylint: disable=attribute-defined-outside-init
+        self.widgets.tray = QSystemTrayIcon()  # pylint: disable=attribute-defined-outside-init
 
         actionStartPause = QAction("Start/Pause", self)
         actionReset = QAction("Reset", self)
