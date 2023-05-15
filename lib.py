@@ -122,10 +122,11 @@ def instanceAlreadyRunning(label="default"):
 
     https://stackoverflow.com/a/384493
     """
-    import fcntl  # pylint: disable=import-outside-toplevel
     # In Windows fcntl is not implemented
     if sys.platform == "win32":
         return False
+
+    import fcntl  # pylint: disable=import-outside-toplevel
 
     path = getCurrentDirectory() + "/" + label + '.lock'
 
