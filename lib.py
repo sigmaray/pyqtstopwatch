@@ -56,7 +56,7 @@ def readOrWriteSettings(settingsFilePath, defaultSettings):
 def validateSettings(settings, defaultSettings):
     """Validate hashmap with parsed settings. Ensure that all keys are present"""
     for key in defaultSettings.keys():
-        if not key in settings.keys():  # or (type(settings[key]) != int) or (settings[key] < 0):
+        if key not in settings.keys():  # or (type(settings[key]) != int) or (settings[key] < 0):
             return False
 
     return True

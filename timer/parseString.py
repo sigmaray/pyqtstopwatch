@@ -88,17 +88,17 @@ def isStringValid(userInput):
         if isFirst:
             # Check if symbol is allowd in the begin of string
             listFirst = list(map(str, range(0, 10)))
-            if not c in listFirst:
+            if c not in listFirst:
                 return False
         elif isLast:
             # Check if symbol is allowd in the end of string
             listLast = list(map(str, range(0, 10))) + ['s', 'm', 'h', 'd', 'w', 'm', 'y']
-            if not c in listLast:
+            if c not in listLast:
                 return False
         else:
             # Check if symbol is allowd in the middle of string
             listMiddle = list(map(str, range(0, 10))) + ['.', ',']
-            if not c in listMiddle:
+            if c not in listMiddle:
                 return False
 
     w = withoutQualifier(stripped)
