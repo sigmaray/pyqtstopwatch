@@ -3,7 +3,6 @@ import sys
 import datetime
 import os
 import json
-import fcntl
 from pathlib import Path
 from PyQt5 import QtCore
 from PyQt5.QtGui import QPixmap, QColor, QPainter, QFont, QIcon
@@ -123,6 +122,10 @@ def instanceAlreadyRunning(label="default"):
 
     https://stackoverflow.com/a/384493
     """
+    import fcntl  # pylint: disable=import-outside-toplevel
+    # In Windows fcntl is not implemented
+    if sys.platform == "win32":
+        return False
 
     path = getCurrentDirectory() + "/" + label + '.lock'
 
