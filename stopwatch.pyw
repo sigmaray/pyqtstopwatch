@@ -6,15 +6,19 @@ from PyQt5.QtGui import QFont
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import qApp, QApplication, QAction, QMainWindow, QMessageBox, \
     QSystemTrayIcon, QMenu, QLabel, QPushButton, QDesktopWidget
-import lib
+
+sys.path.append('./include')
+import helpers
+from single_instance_windows import SingleInstanceWindows
+from single_instance_unix import SingleInstanceUnix
 
 
-class Window(QMainWindow):
+class Stopwatch(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
     """
     Window of Stopwatch
     """
 
-    SETTINGS_FILE = "stopwatchd.json"
+    SETTINGS_FILE = "stopwatch.json"
 
     # Default settings to be written in json file (if file is absent)
     DEFAULT_SETTINGS = {
@@ -35,13 +39,13 @@ class Window(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        if lib.instanceAlreadyRunning('stopwatch'):
+        if self.isAlreadyRunningUnix() or self.isAlreadyRunningWindows():
             print('Another instance is already running. Exiting')
             QMessageBox.about(
                 self, "Error", 'Another instance is already running. Exiting')
             sys.exit()
 
-        self.settings = munchify(lib.readOrWriteSettings(
+        self.settings = munchify(helpers.readOrWriteSettings(
             self.SETTINGS_FILE, self.DEFAULT_SETTINGS))
         self.state.count = self.settings.count
         if self.state.count > 0:
@@ -53,7 +57,7 @@ class Window(QMainWindow):
         self.setGeometry(100, 100, 400, 500)
 
         self.setWindowIcon(QtGui.QIcon(
-            lib.getCurrentDirectory() + "/stopwatch/" + 'icon.png'))
+            helpers.getCurrentDirectory() + "/stopwatch/" + 'icon.png'))
 
         self.addUiComponents()
 
@@ -67,7 +71,7 @@ class Window(QMainWindow):
 
     def setTrayText(self, text="--"):
         """Render text in tray icon"""
-        self.widgets.tray.setIcon(lib.drawIcon(text, self.COLOR1, self.COLOR2))
+        self.widgets.tray.setIcon(helpers.drawIcon(text, self.COLOR1, self.COLOR2))
 
     def addTrayIcon(self):
         """Add tray icon with menu"""
@@ -184,7 +188,7 @@ class Window(QMainWindow):
         if self.state.isRunning:
             text = '<html>'
             text += '&nbsp;&nbsp;&nbsp;'
-            text += lib.genTextFull(self.state.count)
+            text += helpers.genTextFull(self.state.count)
             if self.state.isPaused:
                 text += " p"
             else:
@@ -192,7 +196,7 @@ class Window(QMainWindow):
             self.widgets.label.setText(text)
             text = '</html>'
             if not self.state.isPaused:
-                self.setTrayText(lib.genTextShort(self.state.count))
+                self.setTrayText(helpers.genTextShort(self.state.count))
             else:
                 self.setTrayText("p")
         else:
@@ -252,7 +256,7 @@ class Window(QMainWindow):
 
         self.settings.count = self.state.count = newVal
 
-        lib.writeSettingsFile(self.SETTINGS_FILE, self.settings)
+        helpers.writeSettingsFile(self.SETTINGS_FILE, self.settings)
 
         self.updateTexts()
 
@@ -318,5 +322,5 @@ class Window(QMainWindow):
 
 App = QApplication(sys.argv)
 App.setQuitOnLastWindowClosed(False)
-window = Window()
+window = Stopwatch()
 sys.exit(App.exec())

@@ -11,10 +11,7 @@ stopwatch:
 .PHONY: createvenv
 createvenv:
 	python3 -m venv .venv
-
-.PHONY: usevenv
-usevenv:
-	@echo "You should run << source .venv/bin/activate >>"
+	@echo "Please run << source .venv/bin/activate >> in your terminal"
 
 .PHONY: pipinstall
 pipinstall:
@@ -32,3 +29,14 @@ docker-run:
 .PHONY: docker-build-and-run
 docker-build-and-run:
 	docker build -t pyqtstopwatch . && docker run -it -p 8080:8080 pyqtstopwatch
+
+.PHONY: pylint
+pylint:
+	pylint $$(git ls-files '*.py' '*.pyw')
+
+.PHONY: flake8
+flake8:
+	flake8 $$(git ls-files '*.py' '*.pyw')
+
+.PHONY: linters
+linters: pylint flake8
