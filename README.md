@@ -1,4 +1,8 @@
-# Stopwatch and timer in Python/QT
+# Cross platform stopwatch and timer in Python/QT
+
+Timer intervals are being saved into file on disk, they survive application restart.
+
+Application add icon into tray. Click on it with middle mouse button to pause stopwatch or timer.
 
 ## How to install:
 ```
@@ -29,6 +33,6 @@ I used the code from geeksforgeeks, but heavily reworked it and added tray icon.
 ## Screenshots
 
 
-![image](https://user-images.githubusercontent.com/1594701/131195176-0f94d59a-623f-4815-8a07-91a473b1402f.png)
+![image](https://github.com/sigmaray/pyqtstopwatch/assets/1594701/17440cb7-b439-47e0-b362-1e5f9ae2fe3c)
 
-![image](https://user-images.githubusercontent.com/1594701/131195182-ac3d50f6-4bd0-492e-a8af-3a2b7c6be0ea.png)
+![image](https://github.com/sigmaray/pyqtstopwatch/assets/1594701/28059e3a-f06c-41c8-b71b-a71f6ca93845)
