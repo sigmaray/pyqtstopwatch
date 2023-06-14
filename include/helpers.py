@@ -3,6 +3,7 @@ import sys
 import datetime
 import os
 import json
+import math
 from PyQt5 import QtCore
 from PyQt5.QtGui import QPixmap, QColor, QPainter, QFont, QIcon
 
@@ -83,19 +84,19 @@ def drawIcon(strVal="--", textColor="#000", bgColor="#fff"):
 
 def genTextFull(count):
     """Convert int value into full time to be shown in window"""
-    tdShort = datetime.timedelta(seconds=round(count / 10))
+    tdShort = datetime.timedelta(seconds=math.floor(count / 10))
     tdFull = datetime.timedelta(seconds=count / 10)
-    mStr = str(round(tdFull.microseconds / 100000))
+    mStr = str(math.floor(tdFull.microseconds / 100000))
     return str(tdShort) + "." + mStr
 
 
 def genTextShort(count):
     """Convert int value into short time to be shown in tray"""
     seconds = count / 10
-    secondsInt = round(seconds)
-    minInt = round(seconds / 60)
+    secondsInt = math.floor(seconds)
+    minInt = math.floor(seconds / 60)
     hFloat = float(seconds) / 60 / 60
-    hInt = round(seconds / 60 / 60)
+    hInt = math.floor(seconds / 60 / 60)
 
     if seconds <= 99:
         return str(secondsInt) + "s"
