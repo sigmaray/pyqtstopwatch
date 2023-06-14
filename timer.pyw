@@ -5,11 +5,15 @@ from PyQt5.QtGui import QFont, QIcon
 from PyQt5.QtCore import Qt, QTimer
 from munch import munchify, Munch
 import sys
+import os
 
-sys.path.append('./timer')
+# Import modules from './timer/' dir
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/timer')
 from timerEndedDialog import TimeEndedDialog
 import parseString
-sys.path.append('./include')
+
+# Import modules from './include/' dir
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/include')
 import helpers
 from single_instance_windows import SingleInstanceWindows
 from single_instance_unix import SingleInstanceUnix

@@ -6,8 +6,10 @@ from PyQt5.QtGui import QFont
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import qApp, QApplication, QAction, QMainWindow, QMessageBox, \
     QSystemTrayIcon, QMenu, QLabel, QPushButton, QDesktopWidget
+import os
 
-sys.path.append('./include')
+# Import modules from './include/' dir
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/include')
 import helpers
 from single_instance_windows import SingleInstanceWindows
 from single_instance_unix import SingleInstanceUnix
