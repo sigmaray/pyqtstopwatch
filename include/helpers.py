@@ -1,5 +1,6 @@
 """Helper functions that are used in stopwatch.pyw and timer.pyw"""
 import sys
+import time
 import datetime
 import os
 import json
@@ -8,6 +9,11 @@ from PyQt5 import QtCore
 from PyQt5.QtGui import QPixmap, QColor, QPainter, QFont, QIcon
 
 SETTINGS_FILE = "pyqtstopwatchd.json"
+
+
+def getCentiseconds():
+    """Get current time in centiseconds (since the epoch)"""
+    return round(time.time() * 100)
 
 
 def fullPath(fileName):
@@ -84,15 +90,14 @@ def drawIcon(strVal="--", textColor="#000", bgColor="#fff"):
 
 def genTextFull(count):
     """Convert int value into full time to be shown in window"""
-    tdShort = datetime.timedelta(seconds=math.floor(count / 10))
-    tdFull = datetime.timedelta(seconds=count / 10)
-    mStr = str(math.floor(tdFull.microseconds / 100000))
-    return str(tdShort) + "." + mStr
+    delta = datetime.timedelta(seconds=math.floor(count / 100))
+    decisecond = str(count % 100)[0]
+    return str(delta) + "." + decisecond
 
 
 def genTextShort(count):
     """Convert int value into short time to be shown in tray"""
-    seconds = count / 10
+    seconds = count / 100
     secondsInt = math.floor(seconds)
     minInt = math.floor(seconds / 60)
     hFloat = float(seconds) / 60 / 60
@@ -112,4 +117,8 @@ def genTextShort(count):
 
 def getCurrentDirectory():
     """Get current directory (that contains python script)"""
-    return os.path.dirname(os.path.realpath(__file__)).replace("/include", "")
+    return (
+        os.path.dirname(os.path.realpath(__file__))
+        .replace("/include", "")
+        .replace("\\include", "")
+    )

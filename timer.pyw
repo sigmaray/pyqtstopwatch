@@ -28,7 +28,7 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
 
     # Default settings to be written in json file (if file is absent)
     DEFAULT_SETTINGS = {
-        "count": 0,
+        "counted": 0,
         "chosenInterval": None
     }
 
@@ -38,7 +38,13 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
     # Background of tray icon, border and font color of label in the window
     COLOR2 = "#000"
 
-    state = Munch(chosenInterval=0, count=0, isRunning=False, isPaused=False,)
+    state = Munch(
+        chosenInterval=0,
+        counted=0,
+        currentCentiseconds=0,
+        isRunning=False,
+        isPaused=False,
+    )
 
     # Grouping all widgets into a single object/namespace
     widgets = Munch()
@@ -54,9 +60,9 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
 
         self.settings = munchify(helpers.readOrWriteSettings(
             self.SETTINGS_FILE, self.DEFAULT_SETTINGS))
-        self.state.count = self.settings.count
+        self.state.counted = self.settings.counted
         self.state.chosenInterval = self.settings.chosenInterval
-        if self.state.count > 0 and self.state.chosenInterval > 0:
+        if self.state.counted > 0 and self.state.chosenInterval > 0:
             self.state.isRunning = True
             self.state.isPaused = True
 
@@ -73,9 +79,9 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
 
         self.addUiComponents()
 
-        self.addTimer()
-
         self.addTrayIcon()
+
+        self.addTimer()
 
         self.show()
 
@@ -135,7 +141,8 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         """Add timer, connect it to handler function, start it"""
         timer = QTimer(self)
         timer.timeout.connect(self.onTimer)
-        timer.start(100)
+        timer.start(10)
+        self.onTimer()
 
     def addUiComponents(self):  # pylint: disable=too-many-statements
         """Add UI components and connect them to handler functions"""
@@ -242,12 +249,19 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         * Update texts in UI
         * When counter becomes zero, show TimeEndedDialog and disable buttons
         """
+        previousCentiseconds = self.state.currentCentiseconds or helpers.getCentiseconds()
+        self.state.currentCentiseconds = helpers.getCentiseconds()
+
         if self.state.isRunning and not self.state.isPaused:
-            self.settings.count = self.state.count = self.state.count - 1
+            # Timer can be not accurate
+            # https://stackoverflow.com/questions/58699630/accurate-timer-with-pyqt
+            # self.settings.counted = self.state.counted = self.state.counted - 1
+            delta = self.state.currentCentiseconds - previousCentiseconds
+            self.settings.counted = self.state.counted = self.state.counted - delta
 
             helpers.writeSettingsFile(self.SETTINGS_FILE, self.settings)
 
-            if self.state.count == 0:
+            if self.state.counted == 0:
                 self.state.isRunning = False
                 self.updateTexts(True)
                 TimeEndedDialog.run()
@@ -265,12 +279,12 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
             self.widgets.labelCountdown.setText("Completed !!!! ")
             self.setTrayText("!!!")
         elif self.state.isRunning:
-            text = helpers.genTextFull(self.state.count)
+            text = helpers.genTextFull(self.state.counted)
             if self.state.isPaused:
                 text += " p"
             self.widgets.labelCountdown.setText("countdown: " + text)
             if not self.state.isPaused:
-                self.setTrayText(helpers.genTextShort(self.state.count))
+                self.setTrayText(helpers.genTextShort(self.state.counted))
             else:
                 self.setTrayText("p")
         else:
@@ -296,7 +310,7 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         """
         Show dialog asking user for time interval
         """
-        second, done = QInputDialog.getText(self, 'Seconds', 'Enter Seconds:')
+        second, done = QInputDialog.getText(self, 'Seconds', 'Enter interval\nExamples: "60" or "60s" or "1m", "3600" or "60m" or "1h", "12h" or "1d"')
         v = self.parseInputtedValue(second)
         return v, done
 
@@ -323,7 +337,7 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         v, done = self.askTime()
 
         if done and v > 0:
-            self.settings.chosenInterval = self.state.chosenInterval = self.state.count = v * 10
+            self.settings.chosenInterval = self.state.chosenInterval = self.state.counted = v * 10
             helpers.writeSettingsFile(self.SETTINGS_FILE, self.settings)
 
             self.state.isRunning = True
@@ -338,9 +352,9 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
 
     def onClickStartPause(self):
         """When Start/Pause button is pressed"""
-        if self.state.count == 0 and not self.state.isPaused and self.state.chosenInterval != 0:
+        if self.state.counted == 0 and not self.state.isPaused and self.state.chosenInterval != 0:
             self.state.isRunning = True
-            self.state.count = self.state.chosenInterval
+            self.state.counted = self.state.chosenInterval
             self.widgets.buttonStartPause.setText("Pause")
             self.widgets.buttonReset.setDisabled(False)
             self.minusPlusButtonSetDisabled(False)
@@ -359,7 +373,7 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         self.state.isRunning = False
         self.state.isPaused = False
 
-        self.state.count = 0
+        self.state.counted = 0
 
         self.updateTexts()
 
@@ -378,27 +392,27 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
 
     def onClickMinus1h(self):
         """When -1h button is pressed"""
-        self.changeTimeByDeltaAndUpdateUI(-60 * 10 * 60)
+        self.changeTimeByDeltaAndUpdateUI(-60 * 60 * 100)
 
     def onClickMinus10m(self):
         """When -10m button is pressed"""
-        self.changeTimeByDeltaAndUpdateUI(-60 * 10 * 10)
+        self.changeTimeByDeltaAndUpdateUI(-60 * 10 * 100)
 
     def onClickMinus1m(self):
         """When -1m button is pressed"""
-        self.changeTimeByDeltaAndUpdateUI(-60 * 10)
+        self.changeTimeByDeltaAndUpdateUI(-60 * 100)
 
     def onClickPlus1m(self):
         """When +1m button is pressed"""
-        self.changeTimeByDeltaAndUpdateUI(60 * 10)
+        self.changeTimeByDeltaAndUpdateUI(60 * 100)
 
     def onClickPlus10m(self):
         """When +10m button is pressed"""
-        self.changeTimeByDeltaAndUpdateUI(60 * 10 * 10)
+        self.changeTimeByDeltaAndUpdateUI(60 * 10 * 100)
 
     def onClickPlus1h(self):
         """When +1h button is pressed"""
-        self.changeTimeByDeltaAndUpdateUI(60 * 10 * 60)
+        self.changeTimeByDeltaAndUpdateUI(60 * 60 * 100)
 
     def changeTimeByDeltaAndUpdateUI(self, delta):
         """
@@ -406,7 +420,7 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         * Write new counter into JSON settings file.
         * Update UI (texts in window and tray icon)
         """
-        newVal = self.state.count + delta
+        newVal = self.state.counted + delta
 
         self.changeTimeToValAndUpdateUI(newVal)
 
@@ -420,7 +434,7 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         if newVal < 0:
             return
 
-        self.settings.count = self.state.count = newVal
+        self.settings.counted = self.state.counted = newVal
 
         helpers.writeSettingsFile(self.SETTINGS_FILE, self.settings)
 
