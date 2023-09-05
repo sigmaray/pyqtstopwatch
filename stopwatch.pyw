@@ -24,7 +24,7 @@ class Stopwatch(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
 
     # Default settings to be written in json file (if file is absent)
     DEFAULT_SETTINGS = {
-        "count": 0
+        "counted": 0
     }
 
     # Color of text in tray icon
@@ -33,7 +33,12 @@ class Stopwatch(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
     # Background of tray icon, border and font color of label in the window
     COLOR2 = "#6495ED"
 
-    state = Munch(count=0, isRunning=False, isPaused=False)
+    state = Munch(
+        counted=0,  # stopwatch interval in centiseconds
+        currentCentiseconds=0,
+        isRunning=False,
+        isPaused=False
+    )
 
     # Grouping all widgets into a single object/namespace
     widgets = Munch()
@@ -49,8 +54,8 @@ class Stopwatch(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
 
         self.settings = munchify(helpers.readOrWriteSettings(
             self.SETTINGS_FILE, self.DEFAULT_SETTINGS))
-        self.state.count = self.settings.count
-        if self.state.count > 0:
+        self.state.counted = self.settings.counted
+        if self.state.counted > 0:
             self.state.isRunning = True
             self.state.isPaused = True
 
@@ -183,14 +188,15 @@ class Stopwatch(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         """Add timer, connect it to handler function, start it"""
         timer = QTimer(self)
         timer.timeout.connect(self.onTimer)
-        timer.start(100)
+        timer.start(10)
+        self.onTimer()
 
     def updateTexts(self):
         """Update texts in window and tray icon according to self.state"""
         if self.state.isRunning:
             text = '<html>'
             text += '&nbsp;&nbsp;&nbsp;'
-            text += helpers.genTextFull(self.state.count)
+            text += helpers.genTextFull(self.state.counted)
             if self.state.isPaused:
                 text += " p"
             else:
@@ -198,7 +204,7 @@ class Stopwatch(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
             self.widgets.label.setText(text)
             text = '</html>'
             if not self.state.isPaused:
-                self.setTrayText(helpers.genTextShort(self.state.count))
+                self.setTrayText(helpers.genTextShort(self.state.counted))
             else:
                 self.setTrayText("p")
         else:
@@ -207,8 +213,15 @@ class Stopwatch(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
 
     def onTimer(self):
         """When timer is triggered: change time counter and update UI"""
+        previousCentiseconds = self.state.currentCentiseconds or helpers.getCentiseconds()
+        self.state.currentCentiseconds = helpers.getCentiseconds()
+
         if self.state.isRunning and not self.state.isPaused:
-            self.changeTimeByDeltaAndUpdateUI(1)
+            # Timer can be not accurate
+            # https://stackoverflow.com/questions/58699630/accurate-timer-with-pyqt
+            # self.changeTimeByDeltaAndUpdateUI(1)
+            delta = self.state.currentCentiseconds - previousCentiseconds
+            self.changeTimeByDeltaAndUpdateUI(delta)
 
     def onClickStartPause(self):
         """
@@ -256,7 +269,7 @@ class Stopwatch(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         if newVal < 0:
             return
 
-        self.settings.count = self.state.count = newVal
+        self.settings.counted = self.state.counted = newVal
 
         helpers.writeSettingsFile(self.SETTINGS_FILE, self.settings)
 
@@ -270,7 +283,7 @@ class Stopwatch(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         * Update UI (texts in window and tray icon)
         """
 
-        newVal = self.state.count + delta
+        newVal = self.state.counted + delta
 
         if newVal < 0 or not self.state.isRunning:
             return
@@ -279,27 +292,27 @@ class Stopwatch(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
 
     def onClickMinus1h(self):
         """When -1h button is pressed"""
-        self.changeTimeByDeltaAndUpdateUI(-60 * 10 * 60)
+        self.changeTimeByDeltaAndUpdateUI(-60 * 60 * 100)
 
     def onClickMinus10m(self):
         """When -10m button is pressed"""
-        self.changeTimeByDeltaAndUpdateUI(-60 * 10 * 10)
+        self.changeTimeByDeltaAndUpdateUI(-60 * 10 * 100)
 
     def onClickMinus1m(self):
         """When -1m button is pressed"""
-        self.changeTimeByDeltaAndUpdateUI(-60 * 10)
+        self.changeTimeByDeltaAndUpdateUI(-60 * 100)
 
     def onClickPlus1m(self):
         """When +1m button is pressed"""
-        self.changeTimeByDeltaAndUpdateUI(60 * 10)
+        self.changeTimeByDeltaAndUpdateUI(60 * 100)
 
     def onClickPlus10m(self):
         """When +10m button is pressed"""
-        self.changeTimeByDeltaAndUpdateUI(60 * 10 * 10)
+        self.changeTimeByDeltaAndUpdateUI(60 * 10 * 100)
 
     def onClickPlus1h(self):
         """When +1h button is pressed"""
-        self.changeTimeByDeltaAndUpdateUI(60 * 10 * 60)
+        self.changeTimeByDeltaAndUpdateUI(60 * 60 * 100)
 
     def closeEvent(self, event):
         """
