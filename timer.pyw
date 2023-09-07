@@ -310,7 +310,10 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         """
         Show dialog asking user for time interval
         """
-        second, done = QInputDialog.getText(self, 'Seconds', 'Enter interval\nExamples: "60" or "60s" or "1m", "3600" or "60m" or "1h", "12h" or "1d"')
+        second, done = QInputDialog.getText(
+            self,
+            'Seconds', 'Enter interval\nExamples: "60" or "60s" or "1m", "3600" or "60m" or "1h", "12h" or "1d"'
+        )
         v = self.parseInputtedValue(second)
         return v, done
 
