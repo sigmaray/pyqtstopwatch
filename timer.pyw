@@ -340,7 +340,7 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         v, done = self.askTime()
 
         if done and v > 0:
-            self.settings.chosenInterval = self.state.chosenInterval = self.state.counted = v * 10
+            self.settings.chosenInterval = self.state.chosenInterval = self.state.counted = v * 100
             helpers.writeSettingsFile(self.SETTINGS_FILE, self.settings)
 
             self.state.isRunning = True
