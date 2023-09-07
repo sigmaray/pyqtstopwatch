@@ -10,7 +10,8 @@ python3 -m venv .venv # optional
 source .venv/bin/activate # optional
 
 pip install --upgrade pip
-pip install -r requirements.txt 
+pip install -r requirements.txt # in Linux
+pip install -r requirements-windows.txt # in Windows
 ```
 
 ## How to run timer
