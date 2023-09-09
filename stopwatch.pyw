@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 """Stopwatch with tray icon implemented in PyQT"""
 import sys
 from munch import munchify, Munch

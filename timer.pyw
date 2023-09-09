@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 """Timer with tray icon implemented in PyQT"""
 from PyQt5.QtWidgets import QMainWindow, qApp, QApplication, QDesktopWidget, QWidget, QVBoxLayout,\
     QPushButton, QLabel, QHBoxLayout, QSystemTrayIcon, QAction, QMenu, QInputDialog, QMessageBox
