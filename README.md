@@ -16,15 +16,15 @@ pip install -r requirements-windows.txt # in Windows
 
 ## How to run timer
 ```
-python timer.py
+python timer.pyw
 ```
-In Windows you can double click launch_timer.bat.
+In Windows you can double click timer.pyw
 
 ## How to run stopwatch
 ```
-python stopwatch.py
+python stopwatch.pyw
 ```
-In Windows you can double click launch_stopwatch.bat.
+In Windows you can double click stopwatch.pyw
 
 ## Credits
 https://www.geeksforgeeks.org/pyqt5-digital-stopwatch/ and https://www.geeksforgeeks.org/timer-application-using-pyqt5/
