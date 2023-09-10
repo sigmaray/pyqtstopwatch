@@ -30,7 +30,7 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
     # Default settings to be written in json file (if file is absent)
     DEFAULT_SETTINGS = {
         "counted": 0,
-        "chosenInterval": None
+        "chosenInterval": 0
     }
 
     # Color of text in tray icon
@@ -85,6 +85,8 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         self.addTimer()
 
         self.show()
+
+        self.updateTexts()
 
     def setTrayText(self, text="--"):
         """Render text in tray icon"""
@@ -377,7 +379,8 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         self.state.isRunning = False
         self.state.isPaused = False
 
-        self.state.counted = 0
+        self.settings.counted = self.state.counted = 0
+        helpers.writeSettingsFile(self.SETTINGS_FILE, self.settings)
 
         self.updateTexts()
 
