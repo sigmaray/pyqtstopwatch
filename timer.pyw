@@ -328,8 +328,8 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
             self.settings.chosenInterval = self.state.chosenInterval = self.settings.counted = self.state.counted = v * 100
             helpers.writeSettingsFile(self.SETTINGS_FILE, self.settings)
 
-            self.state.isRunning = False
-            self.state.isPaused = False
+            self.state.isRunning = True
+            self.state.isPaused = True
 
             self.widgets.buttonStartPause.setText("Start")
             self.widgets.buttonStartPause.setDisabled(False)
