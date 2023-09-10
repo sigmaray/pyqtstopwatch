@@ -328,8 +328,8 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
             self.settings.chosenInterval = self.state.chosenInterval = self.state.counted = v * 100
             helpers.writeSettingsFile(self.SETTINGS_FILE, self.settings)
 
-            self.state.isRunning = True
-            self.state.isPaused = True
+            self.state.isRunning = False
+            self.state.isPaused = False
 
             self.widgets.buttonStartPause.setText("Start")
             self.widgets.buttonStartPause.setDisabled(False)
@@ -358,12 +358,18 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
 
     def onClickStartPause(self):
         """When Start/Pause button is pressed"""
-        if not self.state.isPaused: # Pause clicked
-            self.state.isPaused = True
-            self.widgets.buttonStartPause.setText("Start")
-        elif self.state.isPaused: # Start clicked
+        # Interval was set but timer was not run. Starting timer first time (Start
+        # button was clicked)
+        if not self.state.isRunning and not self.state.isPaused:
+            self.state.isRunning = True
+            self.widgets.buttonStartPause.setText("Pause")
+        elif self.state.isPaused: # Start button clicked
             self.state.isPaused = False
             self.widgets.buttonStartPause.setText("Pause")
+        elif not self.state.isPaused: # Pause button clicked
+            self.state.isPaused = True
+            self.widgets.buttonStartPause.setText("Start")
+        
 
         self.updateTexts()
 
