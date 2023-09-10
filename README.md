@@ -1,6 +1,6 @@
 # Cross platform stopwatch and timer in Python/QT
 
-Time intervals are being saved into file on disk, they survive application restart.
+Time intervals are saved into file on disk, they survive application restart.
 
 Application adds icon into tray. Click on it with middle mouse button to pause stopwatch or timer.
 

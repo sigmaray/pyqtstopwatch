@@ -1,5 +1,4 @@
 """Helper functions that are used in stopwatch.pyw and timer.pyw"""
-import sys
 import time
 import datetime
 import os
@@ -7,6 +6,7 @@ import json
 import math
 from PyQt5 import QtCore
 from PyQt5.QtGui import QPixmap, QColor, QPainter, QFont, QIcon
+# from PyQt5.QtWidgets import QMessageBox
 
 SETTINGS_FILE = "pyqtstopwatchd.json"
 
@@ -50,12 +50,14 @@ def readOrWriteSettings(settingsFilePath, defaultSettings):
 
     settings = readSettingsFile(settingsFilePath)
 
-    if not validateSettings(settings, defaultSettings):
-        print(settingsFilePath +
-              " is not valid. " +
-              "You can delete it and restart the application. " +
-              "App will recreate settings file if it's not present")
-        sys.exit()
+    # if not validateSettings(settings, defaultSettings):
+    #     QMessageBox.warning(None, "Error", settingsFilePath +
+    #                       " is not valid. " +
+    #                       "May be you are you using settings file from previous version " +
+    #                       "of application and it has different format. " +
+    #                       "You can delete it and restart the application. " +
+    #                       "App will recreate settings file if it's not present")
+    #     sys.exit()
 
     return settings
 

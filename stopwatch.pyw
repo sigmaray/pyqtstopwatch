@@ -23,11 +23,6 @@ class Stopwatch(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
 
     SETTINGS_FILE = "stopwatch.json"
 
-    # Default settings to be written in json file (if file is absent)
-    DEFAULT_SETTINGS = {
-        "counted": 0
-    }
-
     # Color of text in tray icon
     COLOR1 = "#fff"
 
@@ -53,12 +48,7 @@ class Stopwatch(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
                 self, "Error", 'Another instance is already running. Exiting')
             sys.exit()
 
-        self.settings = munchify(helpers.readOrWriteSettings(
-            self.SETTINGS_FILE, self.DEFAULT_SETTINGS))
-        self.state.counted = self.settings.counted
-        if self.state.counted > 0:
-            self.state.isRunning = True
-            self.state.isPaused = True
+        self.loadStateFromDisk()
 
         self.setWindowTitle("PythonStopwatch")
 
@@ -76,6 +66,24 @@ class Stopwatch(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         self.addTimer()
 
         self.show()
+
+        self.updateTexts()
+
+    def loadStateFromDisk(self):
+        self.settings = munchify(helpers.readOrWriteSettings(
+            self.SETTINGS_FILE, self.state))
+
+        # When app is restarted stopwatch should not be started automatically
+        if self.settings.isRunning and not self.settings.isPaused:
+            self.settings.isPaused = True
+
+        self.state.update(self.settings)
+
+    def updateState(self, saveToDisk, **newValues):
+        for key in newValues:
+            self.settings[key] = self.state[key] = newValues[key]
+        if saveToDisk:
+            helpers.writeSettingsFile(self.SETTINGS_FILE, self.settings)
 
     def setTrayText(self, text="--"):
         """Render text in tray icon"""
@@ -95,7 +103,7 @@ class Stopwatch(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         actionReset.triggered.connect(self.onClickReset)
         actionShow.triggered.connect(self.show)
         actionHide.triggered.connect(self.hide)
-        actionQuit.triggered.connect(self.areYouSureAndClose)
+        actionQuit.triggered.connect(self.onExit)
         menu = QMenu()
         menu.addAction(actionStartPause)
         menu.addAction(actionReset)
@@ -142,8 +150,6 @@ class Stopwatch(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         self.widgets.label.setGeometry(75, 30, 250, 70)
         self.widgets.label.setStyleSheet(
             "border : 4px solid " + self.COLOR2 + "; color: " + self.COLOR2 + ";")
-
-        self.updateTexts()
 
         self.widgets.label.setFont(QFont('Arial', 25))
         self.widgets.label.setAlignment(Qt.AlignCenter)
@@ -215,14 +221,27 @@ class Stopwatch(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
     def onTimer(self):
         """When timer is triggered: change time counter and update UI"""
         previousCentiseconds = self.state.currentCentiseconds or helpers.getCentiseconds()
-        self.state.currentCentiseconds = helpers.getCentiseconds()
+        self.updateState(saveToDisk=False, currentCentiseconds=helpers.getCentiseconds())
 
         if self.state.isRunning and not self.state.isPaused:
             # Timer can be not accurate
             # https://stackoverflow.com/questions/58699630/accurate-timer-with-pyqt
-            # self.changeTimeByDeltaAndUpdateUI(1)
+            # self.updateState(saveToDisk=False, counted=self.state.counted + 1)
             delta = self.state.currentCentiseconds - previousCentiseconds
-            self.changeTimeByDeltaAndUpdateUI(delta)
+            self.updateState(saveToDisk=False, counted=self.state.counted + delta)
+            self.updateTexts()
+
+    def updateButtons(self):
+        self.widgets.buttonReset.setDisabled(not self.state.isRunning)
+
+        if self.state.isRunning:
+            if self.state.isPaused:
+                self.widgets.buttonStartPause.setText("Start")
+            else:
+                self.widgets.buttonStartPause.setText("Pause")
+        else:
+            self.widgets.buttonStartPause.setText("Start")
+            self.widgets.buttonStartPause.setDisabled(False)
 
     def onClickStartPause(self):
         """
@@ -231,16 +250,14 @@ class Stopwatch(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         * Change button text
         """
         if not self.state.isRunning:
-            self.state.isPaused = False
-            self.state.isRunning = True
-            self.widgets.buttonStartPause.setText("Pause")
-            self.widgets.buttonReset.setDisabled(False)
+            self.updateState(saveToDisk=True, isPaused=False, isRunning=True)
+            self.updateButtons()
         elif not self.state.isPaused:
-            self.state.isPaused = True
-            self.widgets.buttonStartPause.setText("Start")
-        elif self.state.isPaused:
-            self.state.isPaused = False
-            self.widgets.buttonStartPause.setText("Pause")
+            self.updateState(saveToDisk=True, isPaused=True)
+            self.updateButtons()
+        else:
+            self.updateState(saveToDisk=True, isPaused=False)
+            self.updateButtons()
 
         self.updateTexts()
 
@@ -252,29 +269,11 @@ class Stopwatch(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         * Change text of Pause button to Start
         * Disable Reset button
         """
-        self.state.isRunning = False
-        self.state.isPaused = False
-
-        self.changeTimeToValAndUpdateUI(0)
-
-        self.widgets.buttonStartPause.setText("Start")
-
-        self.widgets.buttonReset.setDisabled(True)
-
-    def changeTimeToValAndUpdateUI(self, newVal):
-        """
-        * Update time counter with new (integer) value.
-        * Write new counter into JSON settings file.
-        * Update UI (texts in window and tray icon)
-        """
-        if newVal < 0:
-            return
-
-        self.settings.counted = self.state.counted = newVal
-
-        helpers.writeSettingsFile(self.SETTINGS_FILE, self.settings)
+        self.updateState(saveToDisk=True, isRunning=False, isPaused=False, counted=0)
 
         self.updateTexts()
+
+        self.updateButtons()
 
     def changeTimeByDeltaAndUpdateUI(self, delta):
         """
@@ -283,13 +282,14 @@ class Stopwatch(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         * Write new counter into JSON settings file.
         * Update UI (texts in window and tray icon)
         """
-
         newVal = self.state.counted + delta
 
         if newVal < 0 or not self.state.isRunning:
             return
 
-        self.changeTimeToValAndUpdateUI(newVal)
+        self.updateState(saveToDisk=True, counted=newVal)
+
+        self.updateTexts()
 
     def onClickMinus1h(self):
         """When -1h button is pressed"""
@@ -322,9 +322,9 @@ class Stopwatch(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         https://learndataanalysis.org/example-of-how-to-use-the-qwidget-close-event-pyqt5-tutorial/
         """
         event.ignore()
-        self.areYouSureAndClose()
+        self.onExit()
 
-    def areYouSureAndClose(self):
+    def onExit(self):
         """
         Ask user's confirmation and exit
         """
@@ -333,6 +333,7 @@ class Stopwatch(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
                                      quit_msg, QMessageBox.No, QMessageBox.Yes)
 
         if reply == QMessageBox.Yes:
+            self.updateState(saveToDisk=True)
             qApp.quit()
 
 
