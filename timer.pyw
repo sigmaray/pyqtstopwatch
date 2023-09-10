@@ -27,12 +27,6 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
 
     SETTINGS_FILE = "timer.json"
 
-    # Default settings to be written in json file (if file is absent)
-    DEFAULT_SETTINGS = {
-        "counted": 0,
-        "chosenInterval": 0
-    }
-
     # Color of text in tray icon
     COLOR1 = "#fff"
 
@@ -52,9 +46,12 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
 
     def deserealizeStateFromDisk(self):
         self.settings = munchify(helpers.readOrWriteSettings(
-            self.SETTINGS_FILE, self.DEFAULT_SETTINGS))
+            self.SETTINGS_FILE, self.state))
+
+        # When game is restarted timer should not be started automatically
         if self.settings.isRunning and not(self.settings.isPaused):
             self.settings.isPaused = True
+
         self.state.update(self.settings)
 
     def __init__(self):
