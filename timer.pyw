@@ -218,7 +218,7 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
 
         layout.addWidget(self.widgets.buttonMinimize)
 
-        self.widgets.buttonExit = QPushButton("Exit (not to tray)", self)
+        self.widgets.buttonExit = QPushButton("Exit", self)
         self.widgets.buttonExit.clicked.connect(self.areYouSureAndClose)
         layout.addWidget(self.widgets.buttonExit)
 
@@ -323,7 +323,7 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         v, done = self.askTime()
 
         if done and v > 0:
-            self.settings.chosenInterval = self.state.chosenInterval = v * 10
+            self.settings.chosenInterval = self.state.chosenInterval = v * 100
             helpers.writeSettingsFile(self.SETTINGS_FILE, self.settings)
 
             self.state.isRunning = False
