@@ -105,7 +105,7 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         actionShow.triggered.connect(self.show)
         actionHide.triggered.connect(self.hide)
         # actionQuit.triggered.connect(qApp.quit)
-        actionQuit.triggered.connect(self.areYouSureAndClose)
+        actionQuit.triggered.connect(self.onExit)
 
         menu = QMenu()
         menu.addAction(actionShow)
@@ -224,14 +224,14 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         layout.addWidget(self.widgets.buttonMinimize)
 
         self.widgets.buttonExit = QPushButton("Exit", self)
-        self.widgets.buttonExit.clicked.connect(self.areYouSureAndClose)
+        self.widgets.buttonExit.clicked.connect(self.onExit)
         layout.addWidget(self.widgets.buttonExit)
 
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
-    def areYouSureAndClose(self):
+    def onExit(self):
         """
         Ask user's confirmation and exit
         """
@@ -240,6 +240,7 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
                                      quitMsg, QMessageBox.Yes, QMessageBox.No)
 
         if reply == QMessageBox.Yes:
+            self.updateState(saveToDisk = True)
             qApp.quit()
 
     def onTimer(self):
@@ -251,17 +252,17 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         * When counter becomes zero, show TimeEndedDialog and disable buttons
         """
         previousCentiseconds = self.state.currentCentiseconds or helpers.getCentiseconds()
-        self.updateState(currentCentiseconds = helpers.getCentiseconds())
+        self.updateState(saveToDisk = False, currentCentiseconds = helpers.getCentiseconds())
 
         if self.state.isRunning and not self.state.isPaused:
             # Timer can be not accurate
             # https://stackoverflow.com/questions/58699630/accurate-timer-with-pyqt
             # self.settings.counted = self.state.counted = self.state.counted - 1
             delta = self.state.currentCentiseconds - previousCentiseconds
-            self.updateState(counted = self.state.counted - delta)
+            self.updateState(saveToDisk = False, counted = self.state.counted - delta)
 
             if self.state.counted == 0:
-                self.updateState(isRunning = False)
+                self.updateState(saveToDisk = False, isRunning = False)
                 self.updateTexts(completed = True)
                 TimeEndedDialog.run()
                 self.updateTexts()
@@ -319,7 +320,7 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         v, done = self.askTime()
 
         if done and v > 0:
-            self.updateState(chosenInterval = v * 100, counted = 0, isRunning = False, isPaused = False)
+            self.updateState(saveToDisk = True, chosenInterval = v * 100, counted = 0, isRunning = False, isPaused = False)
             self.updateTexts()
             self.updateButtons()
 
@@ -328,9 +329,18 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         v, done = self.askTime()
 
         if done and v > 0:
-            self.updateState(chosenInterval = v * 100, counted = v * 100, isRunning = True, isPaused = False)
+            self.updateState(saveToDisk = True, chosenInterval = v * 100, counted = v * 100, isRunning = True, isPaused = False)
             self.updateTexts()
             self.updateButtons()
+
+    def updateMinusPlusButtons(self, trueOrFalse):
+        """Disable/enable all the buttons that add or substract time"""
+        buttons = [
+            self.widgets.buttonMinus1h, self.widgets.buttonMinus10m, self.widgets.buttonMinus1m,
+            self.widgets.buttonPlus1m, self.widgets.buttonPlus10m, self.widgets.buttonPlus1h
+        ]
+        for button in buttons:
+            button.setDisabled(trueOrFalse)
 
     def updateButtons(self):
         self.widgets.buttonReset.setDisabled(not(self.state.isRunning))
@@ -350,34 +360,26 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         """When Start/Pause button is pressed"""
         # Activate timer (timer is started first time)
         if not self.state.isRunning and not self.state.isPaused:
-            self.updateState(counted = self.state.chosenInterval, isRunning = True)
+            self.updateState(saveToDisk = True, counted = self.state.chosenInterval, isRunning = True)
             self.updateButtons()
         elif self.state.isPaused: # Start button clicked
-            self.updateState(isPaused = False)
+            self.updateState(saveToDisk = True, isPaused = False)
             self.updateButtons()
         elif not self.state.isPaused: # Pause button clicked
-            self.updateState(isPaused = True)
+            self.updateState(saveToDisk = True, isPaused = True)
             self.updateButtons()
 
-    def updateState(self, **newValues):
+    def updateState(self, saveToDisk, **newValues):
         for key in newValues:
             self.settings[key] = self.state[key] = newValues[key]
-        helpers.writeSettingsFile(self.SETTINGS_FILE, self.settings)
+        if saveToDisk:
+            helpers.writeSettingsFile(self.SETTINGS_FILE, self.settings)
 
     def onClickReset(self):
         """When Reset button is pressed"""
-        self.updateState(isRunning = False, isPaused = False, counted = 0)
+        self.updateState(saveToDisk = True, isRunning = False, isPaused = False, counted = 0)
         self.updateTexts()
         self.updateButtons()
-
-    def updateMinusPlusButtons(self, trueOrFalse):
-        """Disable/enable all the buttons that add or substract time"""
-        buttons = [
-            self.widgets.buttonMinus1h, self.widgets.buttonMinus10m, self.widgets.buttonMinus1m,
-            self.widgets.buttonPlus1m, self.widgets.buttonPlus10m, self.widgets.buttonPlus1h
-        ]
-        for button in buttons:
-            button.setDisabled(trueOrFalse)
 
     def onClickMinus1h(self):
         """When -1h button is pressed"""
@@ -423,7 +425,7 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         if newVal < 0:
             return
 
-        self.updateState(counted = newVal)
+        self.updateState(saveToDisk = True, counted = newVal)
 
         helpers.writeSettingsFile(self.SETTINGS_FILE, self.settings)
 
@@ -436,7 +438,7 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         https://learndataanalysis.org/example-of-how-to-use-the-qwidget-close-event-pyqt5-tutorial/
         """
         event.ignore()
-        self.areYouSureAndClose()
+        self.onExit()
 
 
 App = QApplication(sys.argv)
