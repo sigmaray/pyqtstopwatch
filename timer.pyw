@@ -258,7 +258,7 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
 
             if self.state.counted == 0:
                 self.updateState(isRunning = False)
-                self.updateTexts(True)
+                self.updateTexts(completed = True)
                 TimeEndedDialog.run()
                 self.updateTexts()
                 self.updateButtons()
