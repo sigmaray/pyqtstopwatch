@@ -325,16 +325,16 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         v, done = self.askTime()
 
         if done and v > 0:
-            self.settings.chosenInterval = self.state.chosenInterval = v * 100
+            self.settings.chosenInterval = self.state.chosenInterval = self.state.counted = v * 100
             helpers.writeSettingsFile(self.SETTINGS_FILE, self.settings)
 
-            self.state.isRunning = False
-            self.state.isPaused = False
+            self.state.isRunning = True
+            self.state.isPaused = True
 
             self.widgets.buttonStartPause.setText("Start")
             self.widgets.buttonStartPause.setDisabled(False)
-            self.widgets.buttonReset.setDisabled(True)
-            self.minusPlusButtonSetDisabled(True)
+            self.widgets.buttonReset.setDisabled(False)
+            self.minusPlusButtonSetDisabled(False)
 
             self.updateTexts()
 
@@ -358,21 +358,14 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
 
     def onClickStartPause(self):
         """When Start/Pause button is pressed"""
-        if self.state.counted == 0 and not self.state.isPaused and self.state.chosenInterval != 0:
-            self.state.isRunning = True
-            self.state.counted = self.state.chosenInterval
+        if not self.state.isPaused: # Pause clicked
+            self.state.isPaused = True
+            self.widgets.buttonStartPause.setText("Start")
+        elif self.state.isPaused: # Start clicked
+            self.state.isPaused = False
             self.widgets.buttonStartPause.setText("Pause")
-            self.widgets.buttonReset.setDisabled(False)
-            self.minusPlusButtonSetDisabled(False)
-        else:
-            if not self.state.isPaused:
-                self.state.isPaused = True
-                self.widgets.buttonStartPause.setText("Start")
-            elif self.state.isPaused:
-                self.state.isPaused = False
-                self.widgets.buttonStartPause.setText("Pause")
 
-            self.updateTexts()
+        self.updateTexts()
 
     def onClickReset(self):
         """When Reset button is pressed"""
