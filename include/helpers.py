@@ -119,6 +119,7 @@ def genTextShort(count):
 
 def getCurrentDirectory():
     """Get current directory (that contains python script)"""
+    # TODO: Find a better way of handling paths
     return (
         os.path.dirname(os.path.realpath(__file__))
         .replace("/include", "")
