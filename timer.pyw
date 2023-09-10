@@ -63,9 +63,6 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
             self.SETTINGS_FILE, self.DEFAULT_SETTINGS))
         self.state.counted = self.settings.counted
         self.state.chosenInterval = self.settings.chosenInterval
-        if self.state.counted > 0 and self.state.chosenInterval > 0:
-            self.state.isRunning = True
-            self.state.isPaused = True
 
         # self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
 
@@ -87,6 +84,8 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         self.show()
 
         self.updateTexts()
+
+        self.updateButtonsState()
 
     def setTrayText(self, text="--"):
         """Render text in tray icon"""
@@ -224,11 +223,6 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         self.widgets.buttonExit.clicked.connect(self.areYouSureAndClose)
         layout.addWidget(self.widgets.buttonExit)
 
-        if not self.state.isRunning:
-            self.widgets.buttonStartPause.setDisabled(True)
-            self.widgets.buttonReset.setDisabled(True)
-            self.minusPlusButtonSetDisabled(True)
-
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
@@ -356,13 +350,31 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
 
             self.updateTexts()
 
+    def updateButtonsState(self):
+        self.widgets.buttonReset.setDisabled(not(self.state.isRunning))
+        self.minusPlusButtonSetDisabled(not(self.state.isRunning))
+
+        if self.state.isRunning:
+            if self.state.isPaused:
+                self.widgets.buttonStartPause.setText("Start")
+            elif not(self.state.isPaused):
+                self.widgets.buttonStartPause.setText("Pause")
+        else:
+            if self.state.chosenInterval > 0:
+                self.widgets.buttonStartPause.setText("Start")
+                self.widgets.buttonStartPause.setDisabled(False)
+
     def onClickStartPause(self):
         """When Start/Pause button is pressed"""
-        # Interval was set but timer was not run. Starting timer first time (Start
-        # button was clicked)
+        # Activate timer (timer is started first time)
         if not self.state.isRunning and not self.state.isPaused:
+            if self.settings.counted == 0:
+                self.settings.counted = self.state.counted = self.state.chosenInterval
+                helpers.writeSettingsFile(self.SETTINGS_FILE, self.settings)
             self.state.isRunning = True
             self.widgets.buttonStartPause.setText("Pause")
+            self.widgets.buttonReset.setDisabled(False)
+            self.minusPlusButtonSetDisabled(False)
         elif self.state.isPaused: # Start button clicked
             self.state.isPaused = False
             self.widgets.buttonStartPause.setText("Pause")
