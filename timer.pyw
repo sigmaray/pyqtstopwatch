@@ -85,7 +85,7 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
 
         self.updateTexts()
 
-        self.updateButtonsState()
+        self.updateButtons()
 
     def setTrayText(self, text="--"):
         """Render text in tray icon"""
@@ -350,7 +350,7 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
 
             self.updateTexts()
 
-    def updateButtonsState(self):
+    def updateButtons(self):
         self.widgets.buttonReset.setDisabled(not(self.state.isRunning))
         self.minusPlusButtonSetDisabled(not(self.state.isRunning))
 
@@ -385,19 +385,16 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
 
         self.updateTexts()
 
-    def onClickReset(self):
-        """When Reset button is pressed"""
-        self.state.isRunning = False
-        self.state.isPaused = False
-
-        self.settings.counted = self.state.counted = 0
+    def updateState(self, **newValues):
+        for key in newValues:
+            self.settings[key] = self.state[key] = newValues[key]
         helpers.writeSettingsFile(self.SETTINGS_FILE, self.settings)
 
+    def onClickReset(self):
+        """When Reset button is pressed"""
+        self.updateState(isRunning = False, isPaused = False, counted = 0)
         self.updateTexts()
-
-        self.widgets.buttonStartPause.setText('Start')
-        self.widgets.buttonReset.setDisabled(True)
-        self.minusPlusButtonSetDisabled(True)
+        self.updateButtons()
 
     def minusPlusButtonSetDisabled(self, trueOrFalse):
         """Disable/enable all the buttons that add or substract time"""
