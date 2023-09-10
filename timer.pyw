@@ -50,6 +50,11 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
     # Grouping all widgets into a single object/namespace
     widgets = Munch()
 
+    def deserealizeStateFromDisk(self):
+        self.settings = munchify(helpers.readOrWriteSettings(
+            self.SETTINGS_FILE, self.DEFAULT_SETTINGS))
+        self.state.update(self.settings)
+
     def __init__(self):
         super().__init__()
 
@@ -59,10 +64,7 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
                 self, "Error", 'Another instance is already running. Exiting')
             sys.exit()
 
-        self.settings = munchify(helpers.readOrWriteSettings(
-            self.SETTINGS_FILE, self.DEFAULT_SETTINGS))
-        self.state.counted = self.settings.counted
-        self.state.chosenInterval = self.settings.chosenInterval
+        self.deserealizeStateFromDisk()
 
         # self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
 
