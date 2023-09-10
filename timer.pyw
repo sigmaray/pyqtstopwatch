@@ -53,6 +53,8 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
     def deserealizeStateFromDisk(self):
         self.settings = munchify(helpers.readOrWriteSettings(
             self.SETTINGS_FILE, self.DEFAULT_SETTINGS))
+        if self.settings.isRunning and not(self.settings.isPaused):
+            self.settings.isPaused = True
         self.state.update(self.settings)
 
     def __init__(self):
@@ -421,7 +423,7 @@ class Timer(QMainWindow, SingleInstanceUnix, SingleInstanceWindows):
         if newVal < 0:
             return
 
-        self.settings.counted = self.state.counted = newVal
+        self.updateState(counted = newVal)
 
         helpers.writeSettingsFile(self.SETTINGS_FILE, self.settings)
 
