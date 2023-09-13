@@ -59,7 +59,7 @@ jobs:
                 cd .. &&
                 python3 -m PyInstaller timer.pyw --noconsole --paths=timer --paths=include --add-data "timer:timer" --name rtimer --noconfirm &&
                 cd dist/ &&
-                zip -r9 timer-linux rtimer/
+                zip -r9 timer-osx rtimer/
             OUT_FILE_NAME: osx.zip
             ASSET_MIME: application/zip
           - os: windows-2022
