@@ -97,7 +97,7 @@ jobs:
         value=`cat release_url/release_url.txt`
         echo "upload_url=$value" >> $GITHUB_OUTPUT
     - name: Upload Release Asset (stopwatch)
-      id: upload-release-asset
+      id: upload-release-asset-stopwatch
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -107,7 +107,7 @@ jobs:
         asset_name: stopwatch-${{ matrix.OUT_FILE_NAME}}
         asset_content_type: ${{ matrix.ASSET_MIME}}
     - name: Upload Release Asset (timer)
-      id: upload-release-asset
+      id: upload-release-asset-timer
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
