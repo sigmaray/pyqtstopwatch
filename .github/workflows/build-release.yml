@@ -65,6 +65,7 @@ jobs:
           - os: windows-2022
             TARGET: windows
             CMD_BUILD: |
+              pip install -r requirements-windows.txt;
               python3 -m PyInstaller stopwatch.pyw --noconsole --paths=stopwatch --paths=include --add-data "stopwatch;stopwatch" --name rstopwatch --noconfirm;
               cd dist;
               7z -mx9 a stopwatch-windows.zip rstopwatch\;
