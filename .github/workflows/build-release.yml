@@ -38,22 +38,22 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-22.04
-            TARGET: linux
-            CMD_BUILD: >
-                python3 -m PyInstaller stopwatch.pyw --noconsole --paths=stopwatch --paths=include --add-data "stopwatch:stopwatch" --name stopwatch --noconfirm &&
-                cd dist/ &&
-                zip -r9 stopwatch-linux stopwatch/
-            OUT_FILE_NAME: stopwatch-linux.zip
-            ASSET_MIME: application/zip
-          - os: macos-12
-            TARGET: macos
-            CMD_BUILD: >
-                python3 -m PyInstaller stopwatch.pyw --noconsole --paths=stopwatch --paths=include --add-data "stopwatch:stopwatch" --name stopwatch --noconfirm &&
-                cd dist/ &&
-                zip -r9 stopwatch-osx stopwatch/
-            OUT_FILE_NAME: stopwatch-osx.zip
-            ASSET_MIME: application/zip
+          # - os: ubuntu-22.04
+          #   TARGET: linux
+          #   CMD_BUILD: >
+          #       python3 -m PyInstaller stopwatch.pyw --noconsole --paths=stopwatch --paths=include --add-data "stopwatch:stopwatch" --name stopwatch --noconfirm &&
+          #       cd dist/ &&
+          #       zip -r9 stopwatch-linux stopwatch/
+          #   OUT_FILE_NAME: stopwatch-linux.zip
+          #   ASSET_MIME: application/zip
+          # - os: macos-12
+          #   TARGET: macos
+          #   CMD_BUILD: >
+          #       python3 -m PyInstaller stopwatch.pyw --noconsole --paths=stopwatch --paths=include --add-data "stopwatch:stopwatch" --name stopwatch --noconfirm &&
+          #       cd dist/ &&
+          #       zip -r9 stopwatch-osx stopwatch/
+          #   OUT_FILE_NAME: stopwatch-osx.zip
+          #   ASSET_MIME: application/zip
           - os: windows-2022
             TARGET: windows
             CMD_BUILD: |
